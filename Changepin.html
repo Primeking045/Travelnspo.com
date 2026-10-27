@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Change PIN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --input-bg:#E4E2D8;
+    --line:#D8D5C8;
+    --white:#FFFFFF;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 6px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:20px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:8px 30px 30px; display:flex; flex-direction:column;}
+  .state{display:none;}
+  .state.active{display:flex; flex-direction:column; flex:1;}
+
+  .art-wrap{
+    width:110px; height:110px; border-radius:50%; background:var(--mint);
+    display:flex; align-items:center; justify-content:center;
+    margin:10px auto 22px; flex-shrink:0;
+  }
+  .art-wrap svg{width:48px; height:48px;}
+
+  h2{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px; text-align:center; margin-bottom:8px;}
+  .subtext{font-size:13.5px; line-height:1.6; color:var(--gray); text-align:center; max-width:280px; margin:0 auto 26px;}
+
+  .pin-row{display:flex; justify-content:center; gap:12px; margin-bottom:10px;}
+  .pin-box{
+    width:52px; height:60px; text-align:center;
+    font-family:'Poppins', sans-serif; font-size:26px; font-weight:700; color:var(--ink);
+    background:var(--input-bg); border:1.5px solid transparent; border-radius:14px;
+    outline:none; transition:border-color .15s ease, background .15s ease;
+    -webkit-text-security:disc;
+  }
+  .pin-box:focus{border-color:var(--olive); background:var(--white);}
+  .pin-box.filled{background:var(--white); border-color:var(--mint-line);}
+  .pin-box.error{border-color:var(--red);}
+
+  .error-msg{font-size:12.5px; color:var(--red); text-align:center; margin-bottom:8px; min-height:16px;}
+
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+    margin-top:auto;
+  }
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35);}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:.55; cursor:default; transform:none;}
+
+  .success-wrap{text-align:center; margin:auto 0;}
+  .check-circle{
+    width:78px; height:78px; border-radius:50%; background:var(--olive);
+    display:flex; align-items:center; justify-content:center; margin:6px auto 20px;
+  }
+  .check-circle svg{width:36px; height:36px;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:12px auto 0; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" id="backBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Change PIN</h1>
+  </div>
+
+  <div class="scroll">
+
+    <!-- STATE 1: current PIN -->
+    <div class="state active" id="stateCurrent">
+      <div class="art-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.4"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.6" fill="var(--olive-dark)" stroke="none"/><path d="M12 16.6V18"/></svg>
+      </div>
+      <h2>Enter your current PIN</h2>
+      <p class="subtext">Confirm it's you before setting a new PIN.</p>
+      <div class="pin-row" id="rowCurrent">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      </div>
+      <p class="error-msg" id="errorCurrent"></p>
+      <button class="btn btn-solid" id="btnCurrent" disabled>Continue</button>
+    </div>
+
+    <!-- STATE 2: new PIN -->
+    <div class="state" id="stateNew">
+      <div class="art-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>
+      </div>
+      <h2>Set a new PIN</h2>
+      <p class="subtext">Choose a 4-digit PIN you don't use anywhere else.</p>
+      <div class="pin-row" id="rowNew">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      </div>
+      <p class="error-msg" id="errorNew"></p>
+      <button class="btn btn-solid" id="btnNew" disabled>Continue</button>
+    </div>
+
+    <!-- STATE 3: confirm new PIN -->
+    <div class="state" id="stateConfirm">
+      <div class="art-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <h2>Confirm your new PIN</h2>
+      <p class="subtext">Enter it one more time to make sure it matches.</p>
+      <div class="pin-row" id="rowConfirm">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+        <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      </div>
+      <p class="error-msg" id="errorConfirm"></p>
+      <button class="btn btn-solid" id="btnConfirm" disabled>Save PIN</button>
+    </div>
+
+    <!-- STATE 4: success -->
+    <div class="state" id="stateSuccess">
+      <div class="success-wrap">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>PIN updated</h2>
+        <p class="subtext">Your new PIN is active and will be used for your next login.</p>
+      </div>
+      <button class="btn btn-solid" id="btnDone">Back to Settings</button>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const CURRENT_PIN = '1234'; // demo-only: the "real" PIN would come from your backend
+
+  const states = ['stateCurrent','stateNew','stateConfirm','stateSuccess'];
+  let stateIndex = 0;
+  let newPinValue = '';
+
+  function showState(i){
+    stateIndex = i;
+    states.forEach((id, idx) => document.getElementById(id).classList.toggle('active', idx === i));
+  }
+
+  function wirePinRow(rowId, btnId, errorId, onComplete){
+    const boxes = Array.from(document.querySelectorAll('#' + rowId + ' .pin-box'));
+    const btn = document.getElementById(btnId);
+    const errorEl = document.getElementById(errorId);
+
+    function code(){ return boxes.map(b => b.value).join(''); }
+    function refresh(){ btn.disabled = code().length !== 4; }
+
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+        box.classList.toggle('filled', box.value !== '');
+        box.classList.remove('error');
+        errorEl.textContent = '';
+        if(box.value && i < boxes.length - 1){ boxes[i + 1].focus(); }
+        refresh();
+      });
+      box.addEventListener('keydown', e => {
+        if(e.key === 'Backspace' && !box.value && i > 0){ boxes[i - 1].focus(); }
+      });
+    });
+
+    btn.addEventListener('click', () => onComplete(code(), boxes, errorEl));
+    return { boxes, refresh: refresh };
+  }
+
+  wirePinRow('rowCurrent', 'btnCurrent', 'errorCurrent', (code, boxes, errorEl) => {
+    if(code !== CURRENT_PIN){
+      errorEl.textContent = 'That PIN doesn\'t match. Try again.';
+      boxes.forEach(b => b.classList.add('error'));
+      return;
+    }
+    showState(1);
+  });
+
+  wirePinRow('rowNew', 'btnNew', 'errorNew', (code) => {
+    newPinValue = code;
+    showState(2);
+  });
+
+  wirePinRow('rowConfirm', 'btnConfirm', 'errorConfirm', (code, boxes, errorEl) => {
+    if(code !== newPinValue){
+      errorEl.textContent = "PINs don't match. Try again.";
+      boxes.forEach(b => b.classList.add('error'));
+      return;
+    }
+    // demo-only: this is where you'd send the new PIN to your backend
+    // (hashed, never stored in plain text) before confirming success.
+    showState(3);
+  });
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if(stateIndex === 0){ window.location.href = 'Setting.html'; return; }
+    showState(stateIndex - 1);
+  });
+
+  document.getElementById('btnDone').addEventListener('click', () => {
+    window.location.href = 'Setting.html';
+  });
+})();
+</script>
+
+</body>
+</html>

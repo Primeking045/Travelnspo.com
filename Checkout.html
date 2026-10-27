@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Checkout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --bold:#28502F;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --input-bg:#E4E2D8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 14px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+  .state{display:none;}
+  .state.active{display:block;}
+
+  .purpose-note{font-size:13px; color:var(--gray); margin-bottom:18px;}
+
+  .amount-card{
+    background:var(--bold);
+    color:var(--white);
+    border-radius:20px;
+    padding:22px 20px;
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .amount-card .lbl{font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:8px;}
+  .amount-row{display:flex; align-items:center; justify-content:center; gap:4px;}
+  .amount-row span.ngn{font-family:'Poppins', sans-serif; font-weight:800; font-size:26px;}
+  .amount-row input{
+    background:none; border:none; outline:none;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:30px;
+    color:var(--white);
+    width:170px; text-align:left;
+  }
+  .amount-row input::placeholder{color:rgba(255,255,255,0.4);}
+
+  .quick-row{display:flex; gap:8px; margin-bottom:22px;}
+  .quick-chip{
+    flex:1;
+    background:var(--mint);
+    border:1.5px solid var(--mint-line);
+    border-radius:100px;
+    padding:9px 4px;
+    text-align:center;
+    font-size:12.5px; font-weight:700; color:var(--ink);
+    cursor:pointer;
+  }
+  .quick-chip.active{background:var(--olive); color:var(--white); border-color:var(--olive);}
+
+  .section-label{font-family:'Poppins', sans-serif; font-weight:700; font-size:15px; margin:0 0 10px;}
+
+  .method-row{
+    display:flex; align-items:center; gap:12px;
+    border:1.6px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .method-row.selected{border-color:var(--olive); background:var(--mint);}
+  .brand-badge{
+    width:42px; height:28px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:9.5px; color:var(--white);
+    flex-shrink:0;
+  }
+  .method-row .info{flex:1;}
+  .method-row .info b{font-size:13.5px; display:block;}
+  .method-row .info span{font-size:11px; color:var(--gray);}
+  .radio-dot{
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--line);
+    flex-shrink:0;
+    position:relative;
+  }
+  .method-row.selected .radio-dot{border-color:var(--olive);}
+  .method-row.selected .radio-dot::after{
+    content:""; position:absolute; inset:3px; border-radius:50%; background:var(--olive);
+  }
+
+  .add-card-link{
+    display:block;
+    text-align:center;
+    font-size:13px; font-weight:700; color:var(--olive-dark);
+    text-decoration:underline;
+    background:none; border:none; cursor:pointer;
+    margin:4px 0 20px;
+    width:100%;
+  }
+
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35);}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:.55; cursor:default; transform:none;}
+
+  /* ---------- success state ---------- */
+  .success-wrap{text-align:center; padding:30px 4px 4px;}
+  .check-circle{
+    width:78px; height:78px; border-radius:50%; background:var(--olive);
+    display:flex; align-items:center; justify-content:center; margin:6px auto 20px;
+  }
+  .check-circle svg{width:36px; height:36px;}
+  .success-wrap h2{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px; margin-bottom:8px;}
+  .success-wrap p{font-size:13.5px; color:var(--gray); max-width:260px; margin:0 auto 26px; line-height:1.5;}
+  .success-wrap p b{color:var(--ink);}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" id="backBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1 id="pageTitle">Add Funds</h1>
+  </div>
+
+  <div class="scroll">
+
+    <!-- STATE 1: enter amount + pay -->
+    <div class="state active" id="statePay">
+      <p class="purpose-note" id="purposeNote">Top up your TravelInspo savings balance.</p>
+
+      <div class="amount-card">
+        <div class="lbl">Amount</div>
+        <div class="amount-row">
+          <span class="ngn">₦</span>
+          <input type="number" id="amountInput" placeholder="0" inputmode="numeric" value="20000">
+        </div>
+      </div>
+
+      <div class="quick-row" id="quickRow">
+        <div class="quick-chip" data-amt="5000">₦5,000</div>
+        <div class="quick-chip" data-amt="10000">₦10,000</div>
+        <div class="quick-chip active" data-amt="20000">₦20,000</div>
+        <div class="quick-chip" data-amt="50000">₦50,000</div>
+      </div>
+
+      <div class="section-label">Pay with</div>
+      <div id="methodList"></div>
+
+      <button class="btn btn-solid" id="payBtn">Pay ₦20,000</button>
+    </div>
+
+    <!-- STATE 2: success -->
+    <div class="state" id="stateSuccess">
+      <div class="success-wrap">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>Payment successful</h2>
+        <p id="successNote"><b>₦20,000</b> was added to your savings balance.</p>
+        <button class="btn btn-solid" id="doneBtn">Done</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const purpose = params.get('purpose') || 'Add funds to Savings';
+  const returnTo = params.get('return') || 'Saving.html';
+  const editable = params.get('editable') !== '0';
+  const initialAmount = parseInt(params.get('amount') || '20000', 10);
+
+  document.getElementById('pageTitle').textContent = params.get('title') || 'Add Funds';
+  document.getElementById('purposeNote').textContent = purpose;
+
+  const amountInput = document.getElementById('amountInput');
+  amountInput.value = initialAmount;
+  amountInput.readOnly = !editable;
+
+  const quickRow = document.getElementById('quickRow');
+  if(!editable) quickRow.style.display = 'none';
+
+  const payBtn = document.getElementById('payBtn');
+
+  function money(n){ return '₦' + Math.max(0, Math.round(n)).toLocaleString('en-NG'); }
+
+  function refreshPayBtn(){
+    const amt = parseInt(amountInput.value || '0', 10);
+    payBtn.textContent = 'Pay ' + money(amt);
+    payBtn.disabled = !amt || amt <= 0;
+  }
+  amountInput.addEventListener('input', refreshPayBtn);
+
+  quickRow.querySelectorAll('.quick-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      quickRow.querySelectorAll('.quick-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      amountInput.value = chip.dataset.amt;
+      refreshPayBtn();
+    });
+  });
+  refreshPayBtn();
+
+  // ---------- payment methods (same demo set as Payment Methods page) ----------
+  const methods = [
+    { id:'visa',  brand:'VISA',       color:'#2F6B3C', last4:'4242', label:'Visa •••• 4242' },
+    { id:'mc',    brand:'MASTERCARD', color:'#3A6E8F', last4:'8891', label:'Mastercard •••• 8891' },
+    { id:'bank',  brand:'BANK',       color:'#8A6A2F', last4:null,   label:'Bank Transfer' }
+  ];
+  let selectedMethod = methods[0].id;
+
+  const methodList = document.getElementById('methodList');
+  function renderMethods(){
+    methodList.innerHTML = '';
+    methods.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'method-row' + (m.id === selectedMethod ? ' selected' : '');
+      row.innerHTML = `
+        <div class="brand-badge" style="background:${m.color};">${m.brand === 'MASTERCARD' ? 'MC' : m.brand === 'BANK' ? '🏦' : m.brand}</div>
+        <div class="info"><b>${m.label}</b>${m.last4 ? `<span>Expires on file</span>` : `<span>Instant confirmation</span>`}</div>
+        <div class="radio-dot"></div>`;
+      row.addEventListener('click', () => { selectedMethod = m.id; renderMethods(); });
+      methodList.appendChild(row);
+    });
+  }
+  renderMethods();
+
+  // ---------- back / cancel ----------
+  document.getElementById('backBtn').addEventListener('click', () => { window.location.href = returnTo; });
+
+  // ---------- pay ----------
+  payBtn.addEventListener('click', () => {
+    const amt = parseInt(amountInput.value || '0', 10);
+    if(!amt || amt <= 0) return;
+    payBtn.disabled = true;
+    payBtn.textContent = 'Processing…';
+    // demo-only: this is where you'd call your real payment processor
+    // (card charge, bank transfer confirmation, etc.) before showing success.
+    setTimeout(() => {
+      document.getElementById('successNote').innerHTML = '<b>' + money(amt) + '</b> was added to your savings balance.';
+      document.getElementById('statePay').classList.remove('active');
+      document.getElementById('stateSuccess').classList.add('active');
+    }, 900);
+  });
+
+  document.getElementById('doneBtn').addEventListener('click', () => { window.location.href = returnTo; });
+})();
+</script>
+
+</body>
+</html>

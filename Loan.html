@@ -1,0 +1,930 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Travel Loans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --red:#C4483E;
+    --input-bg:#E4E2D8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- top bar + progress ---------- */
+  .topbar{
+    flex-shrink:0;
+    padding:20px 20px 14px;
+  }
+  .top-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .back-btn{
+    width:34px; height:34px; border:none; background:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .step-label{font-size:12.5px; font-weight:700; color:var(--gray);}
+  .progress-track{height:5px; background:var(--line); border-radius:10px; overflow:hidden;}
+  .progress-fill{height:100%; width:25%; background:var(--olive); border-radius:10px; transition:width .3s ease;}
+
+  .scroll{flex:1; overflow-y:auto; padding:6px 22px 26px;}
+  .state{display:none;}
+  .state.active{display:block;}
+
+  h2.step-title{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px; margin-bottom:6px;}
+  p.step-sub{font-size:13.5px; color:var(--gray); line-height:1.5; margin-bottom:20px;}
+
+  /* ---------- reason chips (step 1) ---------- */
+  .reason-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  .reason-card{
+    border:1.6px solid var(--line);
+    border-radius:16px;
+    padding:14px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .reason-card.selected{border-color:var(--olive); background:var(--mint);}
+  .reason-card .emoji{font-size:22px; display:block; margin-bottom:6px;}
+  .reason-card span.label{font-size:12.5px; font-weight:700;}
+
+  textarea{
+    width:100%;
+    background:var(--input-bg);
+    border:1.5px solid transparent;
+    border-radius:14px;
+    padding:13px 14px;
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    resize:none;
+    outline:none;
+    min-height:70px;
+  }
+  textarea:focus{border-color:var(--olive); background:var(--white);}
+  textarea::placeholder{color:var(--gray);}
+
+  /* ---------- transport (step 2) ---------- */
+  .toggle-row{display:flex; background:var(--mint); border-radius:100px; padding:4px; margin-bottom:18px;}
+  .toggle-row button{
+    flex:1; border:none; background:none; padding:10px; border-radius:100px;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; color:var(--gray); cursor:pointer;
+  }
+  .toggle-row button.active{background:var(--olive); color:var(--white);}
+
+  .operator-card{
+    display:flex; align-items:center; gap:12px;
+    border:1.6px solid var(--line);
+    border-radius:16px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .operator-card.selected{border-color:var(--olive); background:var(--mint);}
+  .op-badge{
+    width:42px; height:42px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:13px; color:var(--white);
+    flex-shrink:0;
+  }
+  .op-info{flex:1;}
+  .op-info b{font-size:14px; display:block;}
+  .op-info span{font-size:11.5px; color:var(--gray);}
+  .op-fare{text-align:right; flex-shrink:0;}
+  .op-fare b{font-size:13.5px; display:block;}
+  .op-fare span{font-size:10px; color:var(--gray);}
+
+  .field-label{font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.03em; margin:18px 0 8px;}
+  .route-row{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .route-row input{
+    flex:1;
+    background:var(--input-bg); border:1.5px solid transparent; border-radius:12px;
+    padding:12px 14px; font-family:'Inter', sans-serif; font-size:13.5px; color:var(--ink); outline:none;
+  }
+  .route-row input:focus{border-color:var(--olive); background:var(--white);}
+  .swap-btn{
+    width:34px; height:34px; border-radius:50%; border:none; background:var(--mint);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .field-row{display:flex; gap:10px;}
+
+  /* ---------- KYC / identity ---------- */
+  .kyc-input{
+    width:100%;
+    background:var(--input-bg); border:1.5px solid transparent; border-radius:12px;
+    padding:12px 14px; font-family:'Inter', sans-serif; font-size:13.5px; color:var(--ink); outline:none;
+    margin-bottom:10px;
+  }
+  .kyc-input:focus{border-color:var(--olive); background:var(--white);}
+  .id-verify-row{display:flex; gap:8px; align-items:center; margin-bottom:6px;}
+  .id-verify-row .kyc-input{margin-bottom:0; flex:1;}
+  .verify-btn{
+    flex-shrink:0;
+    background:var(--olive); color:var(--white);
+    border:none; border-radius:12px;
+    padding:12px 16px;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:13px;
+    cursor:pointer;
+  }
+  .verify-btn:hover{background:var(--olive-dark);}
+  .verify-btn:disabled{opacity:.6; cursor:default;}
+  .verify-btn.verified{background:var(--olive-dark);}
+  .verified-note{
+    font-size:12.5px; font-weight:600; color:var(--olive-dark);
+    display:flex; align-items:center; gap:6px; min-height:18px;
+  }
+  .verified-note.error{color:var(--red);}
+
+  /* ---------- face verification ---------- */
+  .face-frame{
+    width:220px; height:220px;
+    border-radius:50%;
+    background:var(--mint);
+    margin:10px auto 18px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    border:3px solid var(--mint-line);
+  }
+  .face-frame video{
+    width:100%; height:100%; object-fit:cover; display:none;
+  }
+  .face-frame.camera-on video{display:block;}
+  .face-frame.camera-on .face-placeholder{display:none;}
+  .scan-ring{
+    position:absolute; inset:-3px; border-radius:50%;
+    border:3px solid var(--olive);
+    opacity:0; pointer-events:none;
+  }
+  .scan-ring.scanning{
+    opacity:1;
+    animation:scan-spin 1.1s linear infinite;
+    border-top-color:transparent;
+    border-left-color:transparent;
+  }
+  @keyframes scan-spin{ to{ transform:rotate(360deg); } }
+  .face-check{
+    position:absolute; inset:0;
+    background:rgba(102,128,92,0.88);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; transform:scale(0.8);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .face-check.show{opacity:1; transform:scale(1);}
+  .field-row .col{flex:1;}
+  input[type="date"]{
+    width:100%; background:var(--input-bg); border:1.5px solid transparent; border-radius:12px;
+    padding:12px 14px; font-family:'Inter', sans-serif; font-size:13px; color:var(--ink); outline:none;
+  }
+  input[type="date"]:focus{border-color:var(--olive); background:var(--white);}
+  .stepper{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--input-bg); border-radius:12px; padding:8px 12px;
+  }
+  .stepper button{
+    width:26px; height:26px; border-radius:50%; border:none; background:var(--white);
+    font-size:16px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .stepper span{font-size:14px; font-weight:700;}
+
+  /* ---------- payment plan (step 3) ---------- */
+  .fare-summary{
+    background:var(--mint); border-radius:16px; padding:16px; margin-bottom:18px; text-align:center;
+  }
+  .fare-summary .amt{font-family:'Poppins', sans-serif; font-weight:800; font-size:26px;}
+  .fare-summary .lbl{font-size:12px; color:var(--gray); margin-top:2px;}
+
+  .plan-card{
+    border:1.6px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:10px; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .plan-card.selected{border-color:var(--olive); background:var(--mint);}
+  .plan-head{display:flex; justify-content:space-between; align-items:center;}
+  .plan-head b{font-size:14.5px;}
+  .plan-head .badge{
+    font-size:10.5px; font-weight:700; background:var(--olive); color:var(--white);
+    padding:3px 9px; border-radius:100px;
+  }
+  .plan-head .badge.none{visibility:hidden;}
+  .plan-detail{font-size:12px; color:var(--gray); margin-top:4px;}
+  .plan-per{font-family:'Poppins', sans-serif; font-weight:700; font-size:15px; margin-top:6px;}
+
+  /* ---------- review (step 4) ---------- */
+  .review-card{background:var(--mint); border-radius:16px; padding:16px; margin-bottom:14px;}
+  .review-row{display:flex; justify-content:space-between; padding:7px 0; font-size:13.5px; border-bottom:1px solid var(--mint-line);}
+  .review-row:last-child{border-bottom:none;}
+
+  .method-row{
+    display:flex; align-items:center; gap:12px;
+    border:1.6px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .method-row.selected{border-color:var(--olive); background:var(--mint);}
+  .method-brand{
+    width:42px; height:28px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:9.5px; color:var(--white);
+    flex-shrink:0;
+  }
+  .method-row .info{flex:1;}
+  .method-row .info b{font-size:13.5px; display:block;}
+  .method-row .info span{font-size:11px; color:var(--gray);}
+  .radio-dot{
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--line);
+    flex-shrink:0;
+    position:relative;
+  }
+  .method-row.selected .radio-dot{border-color:var(--olive);}
+  .method-row.selected .radio-dot::after{
+    content:""; position:absolute; inset:3px; border-radius:50%; background:var(--olive);
+  }
+  .review-row span:first-child{color:var(--gray);}
+  .review-row span:last-child{font-weight:700; text-align:right;}
+
+  .schedule-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:11px 4px; border-bottom:1px solid var(--line);
+  }
+  .schedule-item:last-child{border-bottom:none;}
+  .schedule-item .when{font-size:13px; font-weight:700;}
+  .schedule-item .due{font-size:11px; color:var(--gray);}
+  .schedule-item .amt{font-size:13.5px; font-weight:700;}
+
+  /* ---------- success ---------- */
+  .success-wrap{text-align:center; padding:10px 4px 4px;}
+  .check-circle{
+    width:78px; height:78px; border-radius:50%; background:var(--olive);
+    display:flex; align-items:center; justify-content:center; margin:6px auto 20px;
+  }
+  .check-circle svg{width:36px; height:36px;}
+  .success-wrap h2{font-family:'Poppins', sans-serif; font-weight:800; font-size:22px; margin-bottom:8px;}
+  .success-wrap p{font-size:13.5px; color:var(--gray); max-width:270px; margin:0 auto 22px; line-height:1.5;}
+
+  /* ---------- shared ---------- */
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35);}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:.5; cursor:default; transform:none;}
+  .btn-ghost{background:var(--mint); color:var(--ink); margin-top:10px;}
+
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <div class="top-row">
+      <button class="back-btn" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <span class="step-label" id="stepLabel">Step 1 of 4</span>
+      <span style="width:34px;"></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="scroll">
+
+    <!-- STEP 1: reason -->
+    <div class="state active" id="step1">
+      <h2 class="step-title">What's this trip for?</h2>
+      <p class="step-sub">This helps us tailor your loan offer and payment plan to your trip.</p>
+
+      <div class="reason-grid" id="reasonGrid">
+        <div class="reason-card" data-reason="Business"><span class="emoji">💼</span><span class="label">Business</span></div>
+        <div class="reason-card" data-reason="Family / Emergency"><span class="emoji">❤️</span><span class="label">Family / Emergency</span></div>
+        <div class="reason-card" data-reason="Job / Interview"><span class="emoji">🧑‍💼</span><span class="label">Job / Interview</span></div>
+        <div class="reason-card" data-reason="Education"><span class="emoji">🎓</span><span class="label">Education</span></div>
+        <div class="reason-card" data-reason="Wedding / Event"><span class="emoji">🎉</span><span class="label">Wedding / Event</span></div>
+        <div class="reason-card" data-reason="Vacation"><span class="emoji">🧳</span><span class="label">Vacation</span></div>
+        <div class="reason-card" data-reason="Medical"><span class="emoji">🩺</span><span class="label">Medical</span></div>
+        <div class="reason-card" data-reason="Other"><span class="emoji">✏️</span><span class="label">Other</span></div>
+      </div>
+
+      <textarea id="reasonNote" placeholder="Add a little more detail (optional)"></textarea>
+    </div>
+
+    <!-- STEP 2 (NEW): personal + ID verification -->
+    <div class="state" id="stepKyc">
+      <h2 class="step-title">Verify your identity</h2>
+      <p class="step-sub">We need a few details to process your travel loan. Used only to confirm it's really you — never stored or shared beyond this check.</p>
+
+      <div class="field-label">Full legal name</div>
+      <input type="text" class="kyc-input" id="kycName" placeholder="As it appears on your ID">
+
+      <div class="field-row">
+        <div class="col">
+          <div class="field-label">Date of birth</div>
+          <input type="date" id="kycDob">
+        </div>
+        <div class="col">
+          <div class="field-label">Phone number</div>
+          <input type="tel" class="kyc-input" id="kycPhone" placeholder="080..." inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-top:18px;">Verify with</div>
+      <div class="toggle-row">
+        <button type="button" class="active" id="tabNin">NIN</button>
+        <button type="button" id="tabBvn">BVN</button>
+      </div>
+
+      <div class="field-label">NIN / BVN number</div>
+      <div class="id-verify-row">
+        <input type="text" class="kyc-input" id="kycIdNumber" placeholder="Enter your 11-digit NIN" inputmode="numeric" maxlength="11">
+        <button type="button" class="verify-btn" id="verifyIdBtn">Verify</button>
+      </div>
+      <p class="verified-note" id="idVerifiedNote"></p>
+    </div>
+
+    <!-- STEP 3 (NEW): face verification -->
+    <div class="state" id="stepFace">
+      <h2 class="step-title">Quick face check</h2>
+      <p class="step-sub">Center your face in the frame so we can confirm it matches your ID.</p>
+
+      <div class="face-frame" id="faceFrame">
+        <video id="faceVideo" autoplay playsinline muted></video>
+        <div class="face-placeholder" id="facePlaceholder">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--gray)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div class="scan-ring" id="scanRing"></div>
+        <div class="face-check" id="faceCheck">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--white)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+      </div>
+
+      <p class="verified-note" id="faceStatusNote" style="text-align:center; min-height:16px;"></p>
+
+      <button type="button" class="btn btn-ghost" id="startFaceBtn" style="margin-top:4px;">Start Verification</button>
+    </div>
+
+    <!-- STEP 2: transport + route -->
+    <div class="state" id="step2">
+      <h2 class="step-title">How are you travelling?</h2>
+      <p class="step-sub">Pick your operator, route, and date.</p>
+
+      <div class="toggle-row">
+        <button type="button" class="active" id="tabAir">✈️ Airline</button>
+        <button type="button" id="tabBus">🚌 Bus</button>
+      </div>
+
+      <div id="airlineList">
+        <div class="operator-card" data-op="Air Peace" data-fare="65000">
+          <div class="op-badge" style="background:#2F6B3C;">AP</div>
+          <div class="op-info"><b>Air Peace</b><span>Nigeria's largest domestic carrier</span></div>
+          <div class="op-fare"><b>₦65,000</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="Ibom Air" data-fare="72000">
+          <div class="op-badge" style="background:#3A6E8F;">IB</div>
+          <div class="op-info"><b>Ibom Air</b><span>Newer fleet, on-time record</span></div>
+          <div class="op-fare"><b>₦72,000</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="Arik Air" data-fare="78000">
+          <div class="op-badge" style="background:#A84A4A;">AR</div>
+          <div class="op-info"><b>Arik Air</b><span>Widest domestic network</span></div>
+          <div class="op-fare"><b>₦78,000</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="Dana Air" data-fare="60000">
+          <div class="op-badge" style="background:#8A6A2F;">DA</div>
+          <div class="op-info"><b>Dana Air</b><span>Budget-friendly option</span></div>
+          <div class="op-fare"><b>₦60,000</b><span>per seat</span></div>
+        </div>
+      </div>
+
+      <div id="busList" style="display:none;">
+        <div class="operator-card" data-op="God is Good Motors (GIGM)" data-fare="8500">
+          <div class="op-badge" style="background:#2F6B3C;">GI</div>
+          <div class="op-info"><b>God is Good Motors</b><span>GIGM · frequent departures</span></div>
+          <div class="op-fare"><b>₦8,500</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="ABC Transport" data-fare="9000">
+          <div class="op-badge" style="background:#3A6E8F;">AB</div>
+          <div class="op-info"><b>ABC Transport</b><span>Long-distance, AC coaches</span></div>
+          <div class="op-fare"><b>₦9,000</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="GUO Transport" data-fare="7500">
+          <div class="op-badge" style="background:#A84A4A;">GU</div>
+          <div class="op-info"><b>GUO Transport</b><span>Budget-friendly, wide routes</span></div>
+          <div class="op-fare"><b>₦7,500</b><span>per seat</span></div>
+        </div>
+        <div class="operator-card" data-op="Peace Mass Transit" data-fare="7000">
+          <div class="op-badge" style="background:#8A6A2F;">PM</div>
+          <div class="op-info"><b>Peace Mass Transit</b><span>Reliable, southern routes</span></div>
+          <div class="op-fare"><b>₦7,000</b><span>per seat</span></div>
+        </div>
+      </div>
+
+      <div class="field-label">Route</div>
+      <div class="route-row">
+        <input type="text" id="fromInput" placeholder="From (e.g. Lagos)" value="Lagos">
+        <button class="swap-btn" id="swapBtn" aria-label="Swap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v14M3 13l4 4 4-4"/><path d="M17 21V7M13 11l4-4 4 4"/></svg>
+        </button>
+        <input type="text" id="toInput" placeholder="To (e.g. Abuja)" value="Abuja">
+      </div>
+
+      <div class="field-row">
+        <div class="col">
+          <div class="field-label" style="margin-top:8px;">Travel date</div>
+          <input type="date" id="dateInput">
+        </div>
+        <div class="col">
+          <div class="field-label" style="margin-top:8px;">Passengers</div>
+          <div class="stepper">
+            <button type="button" id="paxMinus">–</button>
+            <span id="paxCount">1</span>
+            <button type="button" id="paxPlus">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: payment plan -->
+    <div class="state" id="step3">
+      <h2 class="step-title">Choose your payment plan</h2>
+      <p class="step-sub">We book the trip now — you pay us back on the schedule you pick.</p>
+
+      <div class="fare-summary">
+        <div class="amt" id="totalFareText">₦65,000</div>
+        <div class="lbl" id="totalFareSub">Total trip cost · Air Peace · 1 passenger</div>
+      </div>
+
+      <div class="plan-card selected" data-plan="full" data-installments="1" data-fee="0">
+        <div class="plan-head"><b>Pay in full</b><span class="badge none">No fee</span></div>
+        <div class="plan-detail">One payment today, no added fee.</div>
+        <div class="plan-per" id="planPerFull">₦65,000 today</div>
+      </div>
+      <div class="plan-card" data-plan="2" data-installments="2" data-fee="0.05">
+        <div class="plan-head"><b>Pay in 2</b><span class="badge">+5% fee</span></div>
+        <div class="plan-detail">Split across 2 payments, 2 weeks apart.</div>
+        <div class="plan-per" id="planPer2">₦34,125 × 2</div>
+      </div>
+      <div class="plan-card" data-plan="3" data-installments="3" data-fee="0.08">
+        <div class="plan-head"><b>Pay in 3</b><span class="badge">+8% fee</span></div>
+        <div class="plan-detail">Split across 3 monthly payments.</div>
+        <div class="plan-per" id="planPer3">₦23,400 × 3</div>
+      </div>
+      <div class="plan-card" data-plan="4" data-installments="4" data-fee="0.12">
+        <div class="plan-head"><b>Pay in 4</b><span class="badge">+12% fee</span></div>
+        <div class="plan-detail">Split across 4 monthly payments.</div>
+        <div class="plan-per" id="planPer4">₦18,200 × 4</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: review -->
+    <div class="state" id="step4">
+      <h2 class="step-title">Review your travel loan</h2>
+      <p class="step-sub">Check the details, then confirm to book your trip.</p>
+
+      <div class="review-card">
+        <div class="review-row"><span>Identity</span><span id="rvIdentity">—</span></div>
+        <div class="review-row"><span>Reason</span><span id="rvReason">—</span></div>
+        <div class="review-row"><span>Operator</span><span id="rvOperator">—</span></div>
+        <div class="review-row"><span>Route</span><span id="rvRoute">—</span></div>
+        <div class="review-row"><span>Date</span><span id="rvDate">—</span></div>
+        <div class="review-row"><span>Passengers</span><span id="rvPax">—</span></div>
+        <div class="review-row"><span>Payment plan</span><span id="rvPlan">—</span></div>
+        <div class="review-row"><span>Total repayable</span><span id="rvTotal">—</span></div>
+      </div>
+
+      <div class="field-label">Repayment schedule</div>
+      <div id="scheduleList"></div>
+
+      <div class="field-label">Pay first installment with</div>
+      <div id="loanMethodList"></div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="state" id="stepSuccess">
+      <div class="success-wrap">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>Travel loan approved!</h2>
+        <p id="successSub">Your Air Peace trip from Lagos to Abuja is booked. Your first payment is due today.</p>
+      </div>
+
+      <div class="field-label">Repayment schedule</div>
+      <div id="scheduleListFinal"></div>
+    </div>
+
+  </div>
+
+  <div style="padding:14px 22px calc(env(safe-area-inset-bottom,0px) + 20px); flex-shrink:0;">
+    <button class="btn btn-solid" id="nextBtn" disabled>Continue</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const steps = ['step1','stepKyc','stepFace','step2','step3','step4','stepSuccess'];
+  let stepIndex = 0;
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const stepLabel = document.getElementById('stepLabel');
+  const progressFill = document.getElementById('progressFill');
+  const TOTAL_STEPS = 6;
+
+  const state = {
+    reason: null,
+    note: '',
+    fullName: '',
+    dob: '',
+    phone: '',
+    idType: 'NIN',
+    idNumber: '',
+    idVerified: false,
+    faceVerified: false,
+    mode: 'air',
+    operator: null,
+    fare: 0,
+    from: 'Lagos',
+    to: 'Abuja',
+    date: '',
+    pax: 1,
+    plan: 'full'
+  };
+
+  function money(n){
+    return '₦' + Math.round(n).toLocaleString('en-NG');
+  }
+
+  function render(){
+    steps.forEach((id, i) => document.getElementById(id).classList.toggle('active', i === stepIndex));
+    const shownStep = Math.min(stepIndex + 1, TOTAL_STEPS);
+    stepLabel.textContent = stepIndex >= TOTAL_STEPS ? 'Done' : `Step ${shownStep} of ${TOTAL_STEPS}`;
+    progressFill.style.width = (Math.min(stepIndex + 1, TOTAL_STEPS) / TOTAL_STEPS * 100) + '%';
+    nextBtn.style.display = stepIndex === TOTAL_STEPS ? 'none' : 'block';
+    backBtn.style.visibility = stepIndex === 0 ? 'hidden' : 'visible';
+    validateStep();
+  }
+
+  function validateStep(){
+    if(stepIndex === 0){ nextBtn.disabled = !state.reason; }
+    else if(stepIndex === 1){
+      nextBtn.disabled = !(state.fullName.trim() && state.dob && state.phone.trim().length >= 10 && state.idVerified);
+    }
+    else if(stepIndex === 2){ nextBtn.disabled = !state.faceVerified; }
+    else if(stepIndex === 3){ nextBtn.disabled = !(state.operator && state.from.trim() && state.to.trim() && state.date); }
+    else if(stepIndex === 4){ nextBtn.disabled = !state.plan; }
+    else { nextBtn.disabled = false; }
+  }
+
+  // ---------- STEP 1: reason ----------
+  document.querySelectorAll('.reason-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.reason-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.reason = card.dataset.reason;
+      validateStep();
+    });
+  });
+  document.getElementById('reasonNote').addEventListener('input', e => { state.note = e.target.value; });
+
+  // ---------- STEP 2 (NEW): personal + ID verification ----------
+  const kycName = document.getElementById('kycName');
+  const kycDob = document.getElementById('kycDob');
+  const kycPhone = document.getElementById('kycPhone');
+  const kycIdNumber = document.getElementById('kycIdNumber');
+  const verifyIdBtn = document.getElementById('verifyIdBtn');
+  const idVerifiedNote = document.getElementById('idVerifiedNote');
+  const tabNin = document.getElementById('tabNin');
+  const tabBvn = document.getElementById('tabBvn');
+
+  const todayISO = new Date().toISOString().split('T')[0];
+  kycDob.max = todayISO;
+
+  kycName.addEventListener('input', e => { state.fullName = e.target.value; validateStep(); });
+  kycDob.addEventListener('input', e => { state.dob = e.target.value; validateStep(); });
+  kycPhone.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    state.phone = e.target.value;
+    validateStep();
+  });
+
+  function resetIdVerification(){
+    state.idVerified = false;
+    verifyIdBtn.textContent = 'Verify';
+    verifyIdBtn.classList.remove('verified');
+    idVerifiedNote.textContent = '';
+    idVerifiedNote.classList.remove('error');
+    validateStep();
+  }
+
+  function selectIdType(type){
+    state.idType = type;
+    tabNin.classList.toggle('active', type === 'NIN');
+    tabBvn.classList.toggle('active', type === 'BVN');
+    kycIdNumber.placeholder = `Enter your 11-digit ${type}`;
+    kycIdNumber.value = '';
+    state.idNumber = '';
+    resetIdVerification();
+  }
+  tabNin.addEventListener('click', () => selectIdType('NIN'));
+  tabBvn.addEventListener('click', () => selectIdType('BVN'));
+
+  kycIdNumber.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    state.idNumber = e.target.value;
+    if(state.idVerified) resetIdVerification();
+  });
+
+  verifyIdBtn.addEventListener('click', () => {
+    if(state.idNumber.length !== 11){
+      idVerifiedNote.textContent = `Enter a valid 11-digit ${state.idType} to verify.`;
+      idVerifiedNote.classList.add('error');
+      return;
+    }
+    verifyIdBtn.disabled = true;
+    verifyIdBtn.textContent = 'Checking…';
+    idVerifiedNote.classList.remove('error');
+    idVerifiedNote.textContent = '';
+    // demo-only: this is where you'd call a real NIN/BVN verification
+    // provider (e.g. NIMC or a licensed BVN API) before trusting the match.
+    setTimeout(() => {
+      state.idVerified = true;
+      verifyIdBtn.disabled = false;
+      verifyIdBtn.textContent = '✓ Verified';
+      verifyIdBtn.classList.add('verified');
+      idVerifiedNote.innerHTML = `✓ ${state.idType} verified — name matches your details.`;
+      validateStep();
+    }, 1100);
+  });
+
+  // ---------- STEP 3 (NEW): face verification ----------
+  const faceFrame = document.getElementById('faceFrame');
+  const faceVideo = document.getElementById('faceVideo');
+  const scanRing = document.getElementById('scanRing');
+  const faceCheck = document.getElementById('faceCheck');
+  const faceStatusNote = document.getElementById('faceStatusNote');
+  const startFaceBtn = document.getElementById('startFaceBtn');
+  let cameraStream = null;
+
+  async function tryStartCamera(){
+    try{
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      faceVideo.srcObject = cameraStream;
+      faceFrame.classList.add('camera-on');
+    }catch(err){
+      // demo-only fallback: no camera access in this preview environment —
+      // the flow still works, just without a live video feed.
+    }
+  }
+
+  startFaceBtn.addEventListener('click', () => {
+    if(state.faceVerified) return;
+    startFaceBtn.disabled = true;
+    startFaceBtn.textContent = 'Scanning…';
+    scanRing.classList.add('scanning');
+    faceStatusNote.textContent = 'Hold still, checking against your ID photo…';
+
+    // demo-only: this is where you'd run real liveness detection / a
+    // face-match call against the photo tied to the verified NIN/BVN.
+    setTimeout(() => {
+      scanRing.classList.remove('scanning');
+      faceCheck.classList.add('show');
+      faceStatusNote.textContent = '✓ Face verified — matches your ID.';
+      startFaceBtn.textContent = 'Verified';
+      state.faceVerified = true;
+      if(cameraStream){ cameraStream.getTracks().forEach(t => t.stop()); }
+      validateStep();
+    }, 1800);
+  });
+
+  // ---------- STEP 2: transport ----------
+  const tabAir = document.getElementById('tabAir');
+  const tabBus = document.getElementById('tabBus');
+  const airlineList = document.getElementById('airlineList');
+  const busList = document.getElementById('busList');
+
+  function selectMode(mode){
+    state.mode = mode;
+    state.operator = null; state.fare = 0;
+    document.querySelectorAll('.operator-card').forEach(c => c.classList.remove('selected'));
+    tabAir.classList.toggle('active', mode === 'air');
+    tabBus.classList.toggle('active', mode === 'bus');
+    airlineList.style.display = mode === 'air' ? 'block' : 'none';
+    busList.style.display = mode === 'bus' ? 'block' : 'none';
+    validateStep();
+  }
+  tabAir.addEventListener('click', () => selectMode('air'));
+  tabBus.addEventListener('click', () => selectMode('bus'));
+
+  document.querySelectorAll('.operator-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.operator-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.operator = card.dataset.op;
+      state.fare = parseFloat(card.dataset.fare);
+      validateStep();
+    });
+  });
+
+  const fromInput = document.getElementById('fromInput');
+  const toInput = document.getElementById('toInput');
+  fromInput.addEventListener('input', e => { state.from = e.target.value; validateStep(); });
+  toInput.addEventListener('input', e => { state.to = e.target.value; validateStep(); });
+  document.getElementById('swapBtn').addEventListener('click', () => {
+    const tmp = fromInput.value; fromInput.value = toInput.value; toInput.value = tmp;
+    state.from = fromInput.value; state.to = toInput.value;
+  });
+
+  const dateInput = document.getElementById('dateInput');
+  const today = new Date();
+  dateInput.min = today.toISOString().split('T')[0];
+  dateInput.addEventListener('input', e => { state.date = e.target.value; validateStep(); });
+
+  const paxCount = document.getElementById('paxCount');
+  document.getElementById('paxMinus').addEventListener('click', () => { state.pax = Math.max(1, state.pax - 1); paxCount.textContent = state.pax; refreshPlanAmounts(); });
+  document.getElementById('paxPlus').addEventListener('click', () => { state.pax = Math.min(6, state.pax + 1); paxCount.textContent = state.pax; refreshPlanAmounts(); });
+
+  // ---------- STEP 3: payment plan ----------
+  function totalFare(){ return state.fare * state.pax; }
+
+  function refreshPlanAmounts(){
+    const total = totalFare();
+    document.getElementById('totalFareText').textContent = money(total);
+    document.getElementById('totalFareSub').textContent =
+      `Total trip cost · ${state.operator || 'Select operator'} · ${state.pax} passenger${state.pax > 1 ? 's' : ''}`;
+
+    document.querySelectorAll('.plan-card').forEach(card => {
+      const n = parseInt(card.dataset.installments, 10);
+      const fee = parseFloat(card.dataset.fee);
+      const grand = total * (1 + fee);
+      const per = grand / n;
+      const target = document.getElementById('planPer' + (card.dataset.plan === 'full' ? 'Full' : card.dataset.plan));
+      if(n === 1){ target.textContent = money(per) + ' today'; }
+      else{ target.textContent = money(per) + ' × ' + n; }
+    });
+  }
+
+  document.querySelectorAll('.plan-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.plan = card.dataset.plan;
+      validateStep();
+    });
+  });
+
+  // ---------- STEP 4: review + schedule ----------
+  function planLabel(){
+    const map = { full:'Pay in full', '2':'Pay in 2', '3':'Pay in 3', '4':'Pay in 4' };
+    return map[state.plan];
+  }
+
+  function buildSchedule(){
+    const card = document.querySelector('.plan-card[data-plan="' + state.plan + '"]');
+    const n = parseInt(card.dataset.installments, 10);
+    const fee = parseFloat(card.dataset.fee);
+    const grand = totalFare() * (1 + fee);
+    const per = grand / n;
+    const labels = ['Today', 'In 2 weeks', 'In 1 month', 'In 2 months', 'In 3 months'];
+    const items = [];
+    for(let i = 0; i < n; i++){
+      items.push({ when: n === 1 ? 'Today' : (i === 0 ? 'Today' : labels[i] || `Payment ${i+1}`), amt: per });
+    }
+    return { items, grand };
+  }
+
+  function renderSchedule(containerId){
+    const { items } = buildSchedule();
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    items.forEach((it, i) => {
+      const row = document.createElement('div');
+      row.className = 'schedule-item';
+      row.innerHTML = `<div><div class="when">Payment ${i+1}</div><div class="due">${it.when}</div></div><div class="amt">${money(it.amt)}</div>`;
+      container.appendChild(row);
+    });
+  }
+
+  function renderReview(){
+    document.getElementById('rvIdentity').textContent = state.fullName + ' · ' + state.idType + ' ✓';
+    document.getElementById('rvReason').textContent = state.reason;
+    document.getElementById('rvOperator').textContent = state.operator;
+    document.getElementById('rvRoute').textContent = `${state.from} → ${state.to}`;
+    document.getElementById('rvDate').textContent = state.date || '—';
+    document.getElementById('rvPax').textContent = state.pax;
+    document.getElementById('rvPlan').textContent = planLabel();
+    const { grand } = buildSchedule();
+    document.getElementById('rvTotal').textContent = money(grand);
+    renderSchedule('scheduleList');
+    renderLoanMethods();
+  }
+
+  // ---------- inline payment method picker (kept in-page so wizard state isn't lost) ----------
+  const loanMethods = [
+    { id:'visa', brand:'VISA', color:'#2F6B3C', label:'Visa •••• 4242' },
+    { id:'mc',   brand:'MC',   color:'#3A6E8F', label:'Mastercard •••• 8891' },
+    { id:'bank', brand:'🏦',   color:'#8A6A2F', label:'Bank Transfer' }
+  ];
+  let selectedLoanMethod = 'visa';
+
+  function renderLoanMethods(){
+    const list = document.getElementById('loanMethodList');
+    list.innerHTML = '';
+    loanMethods.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'method-row' + (m.id === selectedLoanMethod ? ' selected' : '');
+      row.innerHTML = `<div class="method-brand" style="background:${m.color};">${m.brand}</div><div class="info"><b>${m.label}</b></div><div class="radio-dot"></div>`;
+      row.addEventListener('click', () => { selectedLoanMethod = m.id; renderLoanMethods(); });
+      list.appendChild(row);
+    });
+  }
+
+  function renderSuccess(){
+    document.getElementById('successSub').textContent =
+      `Your ${state.operator} trip from ${state.from} to ${state.to} is booked. Your first payment is due today.`;
+    renderSchedule('scheduleListFinal');
+  }
+
+  // ---------- nav ----------
+  nextBtn.addEventListener('click', () => {
+    if(stepIndex === 1){ tryStartCamera(); }
+    if(stepIndex === 3){ refreshPlanAmounts(); }
+    if(stepIndex === 4){ renderReview(); }
+    if(stepIndex === 5){
+      // demo-only: this is where you'd submit the application to a real
+      // underwriting / booking backend before showing approval.
+      nextBtn.textContent = 'Processing…';
+      nextBtn.disabled = true;
+      setTimeout(() => {
+        nextBtn.textContent = 'Continue';
+        renderSuccess();
+        stepIndex++;
+        render();
+      }, 700);
+      return;
+    }
+    stepIndex = Math.min(steps.length - 1, stepIndex + 1);
+    render();
+  });
+
+  backBtn.addEventListener('click', () => {
+    if(stepIndex === 0){ window.location.href = 'Dashboard1.html'; return; }
+    stepIndex = Math.max(0, stepIndex - 1);
+    render();
+  });
+
+  document.querySelector('#stepSuccess').insertAdjacentHTML('beforeend',
+    '<button class="btn btn-solid" id="doneBtn" style="margin-top:18px;">Go to Dashboard</button>');
+  document.getElementById('doneBtn').addEventListener('click', () => { window.location.href = 'Dashboard1.html'; });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,414 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#DAE0D9;
+    --cream:#F5F3EA;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --input-bg:#E4E2D8;
+    --line:#D8D5C8;
+    --art-bg:#E7ECE3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+
+  /* ---------- phone frame (desktop preview only) ---------- */
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--sage);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    padding:18px 14px 14px;
+  }
+
+  .card{
+    flex:1;
+    background:var(--cream);
+    border-radius:32px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 24px 0;
+    flex-shrink:0;
+    min-height:36px;
+  
+  }
+
+
+    .logo-container img {
+      max-width: 150px;
+      height: 50%;
+    }
+  
+  .skip{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--olive-dark);
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:4px;
+    visibility:visible;
+  }
+  .skip.hidden{visibility:hidden; pointer-events:none;}
+
+  /* ---------- track ---------- */
+  .viewport{
+    flex:1;
+    overflow:hidden;
+    position:relative;
+  }
+  .track{
+    display:flex;
+    height:100%;
+    width:700%;
+    transition:transform .45s cubic-bezier(.65,0,.35,1);
+  }
+  .slide{
+    width:14.2857%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:14px 30px 0;
+    text-align:center;
+  }
+
+  .art-wrap{
+    width:190px; height:190px;
+    border-radius:50%;
+    background:var(--art-bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:14px 0 26px;
+    flex-shrink:0;
+  }
+  .art-wrap svg{width:104px; height:104px;}
+
+  .slide h1{
+    font-family:'Poppins', sans-serif;
+    font-weight:800;
+    font-size:23px;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+  .slide p{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--gray);
+    max-width:270px;
+  }
+
+  /* ---------- bottom controls ---------- */
+  .controls{
+    flex-shrink:0;
+    padding:18px 24px 26px;
+  }
+  .dots{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    margin-bottom:20px;
+  }
+  .dot{
+    width:7px; height:7px;
+    border-radius:100px;
+    background:#CFCBBB;
+    transition:width .3s ease, background .3s ease;
+  }
+  .dot.active{width:22px; background:var(--olive);}
+
+  .btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    padding:16px 20px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+    text-decoration:none;
+  }
+  .btn-solid{
+    background:var(--olive);
+    color:var(--cream);
+    box-shadow:0 12px 24px rgba(124,148,115,0.35);
+  }
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+
+  .auth-stack{display:none;}
+  .auth-stack.show{display:block;}
+  .next-stack.hide{display:none;}
+
+  .auth-alt{
+    margin-top:16px;
+    font-size:13.5px;
+    color:var(--gray);
+  }
+  .auth-alt a{
+    color:var(--ink);
+    font-weight:700;
+    text-decoration:underline;
+  }
+
+  .home-indicator{
+    width:120px; height:4px;
+    background:var(--ink);
+    opacity:0.2;
+    border-radius:10px;
+    margin:12px auto 0;
+  }
+
+  :focus-visible{outline:3px solid var(--olive); outline-offset:3px;}
+  @media (prefers-reduced-motion:reduce){
+    .track{transition:none;}
+    .btn{transition:none;}
+  }
+
+  /* ---------- fills small / phone-native viewports edge to edge ---------- */
+  @media (max-width:440px){
+    body{padding:0; background:var(--sage);}
+    .device{
+      max-width:none; width:100%; height:100vh;
+      border-radius:0; box-shadow:none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="card">
+
+    <div class="topbar">
+      <div class="logo-container">
+        <img src="Tvl.png" alt="TravelInspo Logo" />
+      </div>
+      <button class="skip" id="skipBtn" type="button">Skip</button>
+    </div>
+
+    <div class="viewport">
+      <div class="track" id="track">
+
+        <!-- Slide 1: Live Map Directions -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M64 16 C48 16 36 28 36 44 C36 64 64 96 64 96 C64 96 92 64 92 44 C92 28 80 16 64 16 Z"/>
+              <circle cx="64" cy="44" r="12" stroke="var(--olive)"/>
+              <path d="M18 108 C34 100 40 112 56 106 C72 100 78 114 94 108 C102 105 106 108 110 106" opacity="0.4"/>
+            </svg>
+          </div>
+          <h1>Live Map Directions</h1>
+          <p>Turn-by-turn routes that adapt in real time to traffic, closures, and detours.</p>
+        </section>
+
+        <!-- Slide 2: Funds Tracker & Budgeting -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="18" y="46" width="92" height="62" rx="14"/>
+              <path d="M18 62 H110" />
+              <circle cx="90" cy="82" r="7" fill="var(--olive)" stroke="none"/>
+              <path d="M40 46 V32 C40 26 45 22 52 22 H88" opacity="0.4"/>
+              <path d="M20 26 L34 20 L36 30 Z" fill="var(--olive)" stroke="none" opacity="0.6"/>
+            </svg>
+          </div>
+          <h1>Funds Tracker &amp; Budgeting</h1>
+          <p>Track spending, set trip budgets, and see price predictions before you book.</p>
+        </section>
+
+        <!-- Slide 3: AI Directions Copilot -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="28" y="34" width="72" height="56" rx="18"/>
+              <circle cx="50" cy="60" r="5" fill="var(--ink)" stroke="none"/>
+              <circle cx="78" cy="60" r="5" fill="var(--ink)" stroke="none"/>
+              <path d="M64 34 V20" />
+              <circle cx="64" cy="16" r="5" fill="var(--olive)" stroke="none"/>
+              <path d="M46 100 L58 90 H70 L82 100" opacity="0.4"/>
+            </svg>
+          </div>
+          <h1>AI Directions Copilot</h1>
+          <p>Chat with your AI travel copilot for routes, recommendations, and quick answers on the go.</p>
+        </section>
+
+        <!-- Slide 4: Road Fun -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M28 66 C28 40 44 24 64 24 C84 24 100 40 100 66" />
+              <rect x="18" y="66" width="20" height="26" rx="8"/>
+              <rect x="90" y="66" width="20" height="26" rx="8"/>
+              <circle cx="64" cy="20" r="4" fill="var(--olive)" stroke="none"/>
+              <path d="M50 100 Q64 110 78 100" opacity="0.4"/>
+            </svg>
+          </div>
+          <h1>Road Fun</h1>
+          <p>Games, playlists, and trivia that make the miles disappear.</p>
+        </section>
+
+        <!-- Slide 5: Weather & Road Conditions -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="46" cy="38" r="16" fill="var(--olive)" stroke="none" opacity="0.7"/>
+              <path d="M34 78 C22 78 14 70 14 60 C14 50 22 44 30 44 C32 32 42 24 54 24 C66 24 76 32 78 44 C90 44 98 52 98 62 C98 72 90 78 80 78 Z"/>
+              <path d="M40 92 V98" /><path d="M56 92 V98" /><path d="M72 92 V98" />
+            </svg>
+          </div>
+          <h1>Weather &amp; Road Conditions</h1>
+          <p>Live weather, hazards, and obstacles flagged before you reach them.</p>
+        </section>
+
+        <!-- Slide 6: Travel Loans -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="24" y="30" width="80" height="58" rx="10"/>
+              <line x1="24" y1="48" x2="104" y2="48"/>
+              <line x1="36" y1="66" x2="76" y2="66" opacity="0.4"/>
+              <line x1="36" y1="76" x2="64" y2="76" opacity="0.4"/>
+              <circle cx="92" cy="84" r="19" fill="var(--cream)" stroke="var(--olive)"/>
+              <path d="M85 84 l5 5 l9-10" stroke="var(--olive)"/>
+            </svg>
+          </div>
+          <h1>Travel Loans</h1>
+          <p>Instant financing for flights, stays, and trips — apply in minutes and repay on your schedule.</p>
+        </section>
+
+        <!-- Slide 7: Driver Connect -->
+        <section class="slide">
+          <div class="art-wrap">
+            <svg viewBox="0 0 128 128" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M32 54 L40 32 H80 L92 54" />
+              <rect x="24" y="54" width="76" height="30" rx="10"/>
+              <circle cx="42" cy="88" r="7" fill="var(--ink)" stroke="none"/>
+              <circle cx="82" cy="88" r="7" fill="var(--ink)" stroke="none"/>
+              <path d="M100 46 h14" stroke="var(--olive)"/>
+              <circle cx="120" cy="46" r="8" stroke="var(--olive)"/>
+            </svg>
+          </div>
+          <h1>Driver Connect</h1>
+          <p>Link up with verified, trusted drivers for safe and reliable travel on every route.</p>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="dots" id="dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="next-stack" id="nextStack">
+        <button class="btn btn-solid" id="nextBtn" type="button">Next</button>
+      </div>
+
+      <div class="auth-stack" id="authStack">
+        <a href="signup.html" class="btn btn-solid" id="signupLink">Create Account</a>
+        <p class="auth-alt">Already have an account? <a href="Login.html">Sign in</a></p>
+      </div>
+    </div>
+
+  </div>
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const track = document.getElementById('track');
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  const skipBtn = document.getElementById('skipBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const nextStack = document.getElementById('nextStack');
+  const authStack = document.getElementById('authStack');
+  const total = 7;
+  let index = 0;
+
+  function render(){
+    track.style.transform = 'translateX(-' + (index * (100/total)) + '%)';
+    dots.forEach((d,i) => d.classList.toggle('active', i === index));
+    const last = index === total - 1;
+    skipBtn.classList.toggle('hidden', last);
+    nextStack.classList.toggle('hide', last);
+    authStack.classList.toggle('show', last);
+  }
+
+  function goTo(i){
+    index = Math.max(0, Math.min(total - 1, i));
+    render();
+  }
+
+  nextBtn.addEventListener('click', () => goTo(index + 1));
+  skipBtn.addEventListener('click', () => goTo(total - 1));
+  dots.forEach((d,i) => d.addEventListener('click', () => goTo(i)));
+
+  // swipe support
+  let startX = null;
+  const viewport = document.querySelector('.viewport');
+  viewport.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+  viewport.addEventListener('touchend', e => {
+    if(startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx) > 40){ goTo(index + (dx < 0 ? 1 : -1)); }
+    startX = null;
+  }, {passive:true});
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight') goTo(index + 1);
+    if(e.key === 'ArrowLeft') goTo(index - 1);
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

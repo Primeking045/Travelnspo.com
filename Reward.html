@@ -1,0 +1,151 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Rewards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --bold:#28502F;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 14px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+
+  .points-card{
+    background:var(--bold);
+    color:var(--white);
+    border-radius:22px;
+    padding:22px 20px;
+    margin-bottom:14px;
+  }
+  .points-card .lbl{font-size:12.5px; color:rgba(255,255,255,0.7); margin-bottom:4px;}
+  .points-card .amt{font-family:'Poppins', sans-serif; font-weight:800; font-size:34px;}
+  .points-card .sub-note{font-size:12px; color:rgba(255,255,255,0.75); margin-top:10px; line-height:1.5;}
+
+  .use-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:14.5px;
+    padding:14px; border-radius:100px; border:none; cursor:pointer;
+    background:var(--olive); color:var(--white);
+    box-shadow:0 10px 20px rgba(124,148,115,0.3);
+    margin-bottom:10px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .use-btn:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .use-btn.ghost{background:var(--mint); color:var(--ink); box-shadow:none; margin-bottom:20px;}
+
+  .section-label{font-family:'Poppins', sans-serif; font-weight:700; font-size:15px; margin:22px 0 10px;}
+  .section-label:first-of-type{margin-top:0;}
+
+  .earn-row{display:flex; align-items:center; gap:12px; padding:10px 2px; border-bottom:1px solid var(--line);}
+  .earn-row:last-child{border-bottom:none;}
+  .earn-row .ico{width:34px; height:34px; border-radius:10px; background:var(--mint); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+  .earn-row .txt{flex:1; font-size:13.5px;}
+  .earn-row .plus{font-size:13px; font-weight:700; color:var(--olive-dark);}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Dashboard1.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Rewards</h1>
+  </div>
+
+  <div class="scroll">
+
+    <div class="points-card">
+      <div class="lbl">Your ride credit</div>
+      <div class="amt" id="creditAmt">₦12,250</div>
+      <div class="sub-note">Real money — use it to pay for part or all of your next ride.</div>
+    </div>
+
+    <button class="use-btn" id="useOnRideBtn">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+      Use on a ride
+    </button>
+    <button class="use-btn ghost" id="useOnLoanBtn">Apply to a loan payment</button>
+
+    <div class="section-label">Ways to earn</div>
+    <div class="earn-row"><div class="ico">🚗</div><div class="txt">Complete a trip</div><div class="plus">+₦250</div></div>
+    <div class="earn-row"><div class="ico">🤝</div><div class="txt">Refer a friend</div><div class="plus">+₦1,000</div></div>
+    <div class="earn-row"><div class="ico">💳</div><div class="txt">Pay a loan installment on time</div><div class="plus">+₦150</div></div>
+    <div class="earn-row"><div class="ico">⭐</div><div class="txt">Rate a trip</div><div class="plus">+₦50</div></div>
+
+    <div class="section-label" style="margin-top:22px;">Recent activity</div>
+    <div class="earn-row"><div class="ico">🚗</div><div class="txt">Trip completed · Lagos</div><div class="plus">+₦250</div></div>
+    <div class="earn-row"><div class="ico">🤝</div><div class="txt">Referral bonus · Ada J.</div><div class="plus">+₦1,000</div></div>
+    <div class="earn-row"><div class="ico">💳</div><div class="txt">On-time loan payment</div><div class="plus">+₦150</div></div>
+    <div class="earn-row"><div class="ico">🚕</div><div class="txt">Used on Driver Connect ride</div><div class="plus" style="color:var(--ink);">-₦2,000</div></div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const balance = 12250; // demo-only: pull this from the user's real wallet balance
+
+  document.getElementById('useOnRideBtn').addEventListener('click', () => {
+    // hands the credit amount to Driver Connect so it can apply it to the fare
+    window.location.href = 'DriveC.html?credit=' + balance;
+  });
+
+  document.getElementById('useOnLoanBtn').addEventListener('click', () => {
+    window.location.href = 'Loan.html?credit=' + balance;
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Trip History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 14px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px;}
+
+  .filter-row{display:flex; gap:8px; padding:0 22px 14px; flex-shrink:0; overflow-x:auto;}
+  .filter-chip{
+    flex-shrink:0;
+    background:var(--mint); border:1.5px solid var(--mint-line);
+    border-radius:100px; padding:8px 14px;
+    font-size:12.5px; font-weight:700; color:var(--ink);
+    cursor:pointer; white-space:nowrap;
+  }
+  .filter-chip.active{background:var(--olive); color:var(--white); border-color:var(--olive);}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+
+  .month-label{
+    font-family:'Poppins', sans-serif; font-weight:700; font-size:13px;
+    color:var(--gray); text-transform:uppercase; letter-spacing:.04em;
+    margin:18px 0 8px;
+  }
+  .month-label:first-child{margin-top:0;}
+
+  .trip-card{
+    display:flex; align-items:center; gap:12px;
+    background:var(--mint);
+    border:1.5px solid var(--mint-line);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .trip-card .ico{
+    width:42px; height:42px; border-radius:12px; background:var(--white);
+    display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;
+  }
+  .trip-card .info{flex:1; min-width:0;}
+  .trip-card .info b{font-size:14px; display:block;}
+  .trip-card .info span{font-size:11.5px; color:var(--gray); display:block; margin-top:2px;}
+  .trip-card .right{text-align:right; flex-shrink:0;}
+  .trip-card .amt{font-size:13.5px; font-weight:700; display:block;}
+  .status-badge{
+    font-size:10px; font-weight:700; padding:3px 8px; border-radius:100px; margin-top:4px; display:inline-block;
+  }
+  .status-badge.completed{background:rgba(124,148,115,0.2); color:var(--olive-dark);}
+  .status-badge.cancelled{background:rgba(196,72,62,0.15); color:var(--red);}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--gray);
+    display:none;
+  }
+  .empty-state.show{display:block;}
+  .empty-state .emoji{font-size:38px; margin-bottom:10px;}
+  .empty-state p{font-size:13.5px;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Dashboard1.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Trip History</h1>
+  </div>
+
+  <div class="filter-row" id="filterRow">
+    <div class="filter-chip active" data-type="all">All</div>
+    <div class="filter-chip" data-type="ride">🚕 Rides</div>
+    <div class="filter-chip" data-type="bus">🚌 Bus</div>
+    <div class="filter-chip" data-type="flight">✈️ Flights</div>
+  </div>
+
+  <div class="scroll">
+
+    <div id="listWrap">
+      <div class="month-label">This month</div>
+      <div class="trip-card" data-type="ride">
+        <div class="ico">🚕</div>
+        <div class="info"><b>Ride · Lekki Phase 1</b><span>Today · Toyota Corolla</span></div>
+        <div class="right"><span class="amt">-₦3,200</span><span class="status-badge completed">Completed</span></div>
+      </div>
+      <div class="trip-card" data-type="bus">
+        <div class="ico">🚌</div>
+        <div class="info"><b>GIGM · Lagos → Ibadan</b><span>3 days ago · Travel Loan</span></div>
+        <div class="right"><span class="amt">-₦8,500</span><span class="status-badge completed">Completed</span></div>
+      </div>
+      <div class="trip-card" data-type="ride">
+        <div class="ico">🚕</div>
+        <div class="info"><b>Ride · Murtala Muhammed Airport</b><span>5 days ago · Cancelled by rider</span></div>
+        <div class="right"><span class="amt">₦0</span><span class="status-badge cancelled">Cancelled</span></div>
+      </div>
+
+      <div class="month-label">Last month</div>
+      <div class="trip-card" data-type="flight">
+        <div class="ico">✈️</div>
+        <div class="info"><b>Air Peace · Lagos → Abuja</b><span>Jul 22 · Travel Loan · Pay in 3</span></div>
+        <div class="right"><span class="amt">-₦65,000</span><span class="status-badge completed">Completed</span></div>
+      </div>
+      <div class="trip-card" data-type="ride">
+        <div class="ico">🚕</div>
+        <div class="info"><b>Ride · Ikeja City Mall</b><span>Jul 14 · Keke</span></div>
+        <div class="right"><span class="amt">-₦700</span><span class="status-badge completed">Completed</span></div>
+      </div>
+      <div class="trip-card" data-type="bus">
+        <div class="ico">🚌</div>
+        <div class="info"><b>ABC Transport · Lagos → Enugu</b><span>Jul 3 · Card payment</span></div>
+        <div class="right"><span class="amt">-₦12,000</span><span class="status-badge completed">Completed</span></div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="emoji">🧳</div>
+      <p>No trips in this category yet.</p>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const chips = document.querySelectorAll('.filter-chip');
+  const cards = document.querySelectorAll('.trip-card');
+  const monthLabels = document.querySelectorAll('.month-label');
+  const emptyState = document.getElementById('emptyState');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const type = chip.dataset.type;
+      let anyVisible = false;
+
+      cards.forEach(card => {
+        const show = type === 'all' || card.dataset.type === type;
+        card.style.display = show ? 'flex' : 'none';
+        if(show) anyVisible = true;
+      });
+
+      // hide a month label if every card under it is filtered out
+      monthLabels.forEach(label => {
+        let node = label.nextElementSibling;
+        let hasVisible = false;
+        while(node && !node.classList.contains('month-label')){
+          if(node.style.display !== 'none') hasVisible = true;
+          node = node.nextElementSibling;
+        }
+        label.style.display = hasVisible ? 'block' : 'none';
+      });
+
+      emptyState.classList.toggle('show', !anyVisible);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

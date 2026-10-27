@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — About</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA; --mint:#E9F3EA; --mint-line:#BFD8C4; --olive:#7C9473; --olive-dark:#66805C;
+    --bold:#28502F; --ink:#242820; --gray:#6B6F63; --line:#E1DFD3; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{background:#ECECEC; font-family:'Inter', sans-serif; color:var(--ink); display:flex; align-items:center; justify-content:center; min-height:100%; padding:24px 0;}
+  .device{width:100%; max-width:400px; height:min(844px, 92vh); background:var(--cream); border-radius:44px; box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 12px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px;}
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+
+  .logo-slot{
+    width:180px; height:62px; margin:8px auto 20px;
+    border:2px dashed var(--olive); border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Inter', monospace; font-size:10px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--olive-dark); opacity:.75;
+    
+  }
+  .logo-slot::before{content:"Your logo here";}
+
+  .tagline{text-align:center; font-family:'Poppins', sans-serif; font-weight:700; font-size:16px; margin-bottom:6px;}
+  .version{text-align:center; font-size:11.5px; color:var(--gray); margin-bottom:22px;}
+
+  .section-label{font-family:'Poppins', sans-serif; font-weight:700; font-size:14px; margin:20px 0 8px;}
+  .section-label:first-of-type{margin-top:0;}
+  p.body-text{font-size:13px; color:var(--gray); line-height:1.6;}
+
+  .pillar-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;}
+  .pillar{background:var(--mint); border-radius:14px; padding:14px; text-align:center;}
+  .pillar .emoji{font-size:20px; display:block; margin-bottom:6px;}
+  .pillar b{font-size:12px; display:block;}
+
+  .link-row{display:flex; align-items:center; justify-content:space-between; padding:12px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .link-row:last-child{border-bottom:none;}
+  .link-row span.label{font-size:13.5px; font-weight:600;}
+  .chev{color:var(--gray);}
+
+  .legal-card{background:var(--bold); color:var(--white); border-radius:14px; padding:14px 16px; margin-top:16px; font-size:11.5px; line-height:1.6; color:#C9E4B8;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){ body{padding:0; background:var(--cream);} .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Setting.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>About</h1>
+  </div>
+  <div class="scroll">
+
+    <div class="logo-slot" role="img" aria-label="inspo-Logo">
+  <img src="Tvl.png" alt="TravelInspo Logo" />
+    </div>
+    
+    <div class="tagline">Your travel companion — and the credit to use it.</div>
+    <div class="version">TravelInspo.com · Version 1.0.0</div>
+
+    <div class="section-label">What we do</div>
+    <p class="body-text">TravelInspo helps you plan, navigate, and afford your next trip. Live map directions, an AI copilot, and weather-aware routing sit alongside Travel Loans — we book your flight or bus ticket now, and you repay it over time.</p>
+
+    <div class="pillar-grid">
+      <div class="pillar"><span class="emoji">🗺️</span><b>Plan</b></div>
+      <div class="pillar"><span class="emoji">✈️</span><b>Travel</b></div>
+      <div class="pillar"><span class="emoji">💳</span><b>Repay</b></div>
+      <div class="pillar"><span class="emoji">🤝</span><b>Repeat</b></div>
+    </div>
+
+    <div class="section-label">More</div>
+    <div class="link-row"><span class="label">Terms of Service</span><span class="chev">›</span></div>
+    <div class="link-row"><span class="label">Privacy Policy</span><span class="chev">›</span></div>
+    <div class="link-row" onclick="window.location.href='FAQs.html'"><span class="label">FAQs</span><span class="chev">›</span></div>
+    <div class="link-row" onclick="window.location.href='InviteFriends.html'"><span class="label">Invite friends</span><span class="chev">›</span></div>
+
+    <div class="legal-card">
+      TravelInspo operates as a technology platform. Travel financing is offered in partnership with a licensed microfinance bank; identity verification runs through a licensed KYC provider. TravelInspo does not directly hold or lend depositor funds.
+    </div>
+
+  </div>
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

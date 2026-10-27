@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Road Fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --bold:#28502F;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 12px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px;}
+
+  .tab-row{display:flex; background:var(--mint); border-radius:100px; padding:4px; margin:0 20px 14px; flex-shrink:0;}
+  .tab-row button{
+    flex:1; border:none; background:none; padding:10px; border-radius:100px;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px; color:var(--gray); cursor:pointer;
+  }
+  .tab-row button.active{background:var(--olive); color:var(--white);}
+
+  .view{display:none; flex:1; min-height:0; flex-direction:column;}
+  .view.active{display:flex;}
+
+  /* ---------------- MUSIC ---------------- */
+  .track-list{flex:1; overflow-y:auto; padding:0 20px 10px;}
+  .track-row{
+    display:flex; align-items:center; gap:12px; padding:10px 8px; border-radius:14px; cursor:pointer;
+  }
+  .track-row.playing{background:var(--mint);}
+  .track-art{
+    width:44px; height:44px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--white);
+  }
+  .track-info{flex:1; min-width:0;}
+  .track-info b{font-size:13.5px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .track-info span{font-size:11.5px; color:var(--gray);}
+  .track-dur{font-size:11.5px; color:var(--gray); flex-shrink:0;}
+  .eq{display:flex; gap:2px; align-items:flex-end; height:14px; width:14px; flex-shrink:0;}
+  .eq span{width:3px; background:var(--olive); border-radius:2px; animation:eqbounce 1s ease-in-out infinite;}
+  .eq span:nth-child(2){animation-delay:.2s;} .eq span:nth-child(3){animation-delay:.4s;}
+  @keyframes eqbounce{0%,100%{height:4px;}50%{height:14px;}}
+
+  .mini-player{
+    flex-shrink:0; background:var(--bold); color:var(--white);
+    padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px); border-radius:20px 20px 0 0;
+  }
+  .mp-top{display:flex; align-items:center; gap:12px;}
+  .mp-art{width:44px; height:44px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .mp-info{flex:1; min-width:0;}
+  .mp-info b{font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mp-info span{font-size:10.5px; color:#C9E4B8;}
+  .mp-controls{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .mp-controls button{background:none; border:none; cursor:pointer; color:var(--white); display:flex; align-items:center; justify-content:center;}
+  .mp-play{
+    width:38px; height:38px; border-radius:50%; background:var(--olive);
+  }
+  .mp-progress-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .mp-progress-row span{font-size:9.5px; color:#C9E4B8; width:28px; flex-shrink:0;}
+  .mp-track{flex:1; height:4px; background:rgba(255,255,255,0.18); border-radius:10px; overflow:hidden;}
+  .mp-fill{height:100%; width:0%; background:var(--olive); border-radius:10px;}
+
+  /* ---------------- LUDO ---------------- */
+  .ludo-setup{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 30px; text-align:center;}
+  .ludo-setup h2{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px; margin-bottom:8px;}
+  .ludo-setup p{font-size:13px; color:var(--gray); margin-bottom:20px;}
+  .pcount-row{display:flex; gap:10px; margin-bottom:24px;}
+  .pcount-chip{
+    width:48px; height:48px; border-radius:50%; border:2px solid var(--line); background:var(--white);
+    font-family:'Poppins', sans-serif; font-weight:700; font-size:16px; cursor:pointer;
+  }
+  .pcount-chip.active{border-color:var(--olive); background:var(--mint); color:var(--olive-dark);}
+
+  .ludo-game{flex:1; display:flex; flex-direction:column; min-height:0;}
+  .ludo-status{
+    flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:8px 20px; font-size:12.5px; font-weight:700;
+  }
+  .turn-dot{width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle;}
+
+  .board-wrap{flex:1; display:flex; align-items:center; justify-content:center; padding:0 16px; min-height:0;}
+  .board{
+    position:relative; width:100%; max-width:300px; aspect-ratio:1/1;
+    background:var(--white); border-radius:16px; border:2px solid var(--line);
+  }
+  .yard-pod{
+    position:absolute; width:22%; height:22%; border-radius:14px;
+    display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:4%; padding:8%;
+  }
+  .yard-slot{border-radius:50%; background:rgba(255,255,255,0.35);}
+  .center-hub{
+    position:absolute; left:38%; top:38%; width:24%; height:24%; border-radius:50%;
+    background:conic-gradient(var(--c-red) 0deg 90deg, var(--c-green) 90deg 180deg, var(--c-yellow) 180deg 270deg, var(--c-blue) 270deg 360deg);
+    border:2px solid var(--white); box-shadow:0 0 0 1px var(--line);
+  }
+  .ring-cell{
+    position:absolute; width:5.6%; height:5.6%; border-radius:50%;
+    background:var(--mint); border:1px solid var(--mint-line); transform:translate(-50%,-50%);
+  }
+  .ring-cell.start{border:2px solid; background:var(--white);}
+  .home-dot{
+    position:absolute; width:4%; height:4%; border-radius:50%; opacity:0.55; transform:translate(-50%,-50%);
+  }
+  .token{
+    position:absolute; width:7%; height:7%; border-radius:50%; border:2px solid var(--white);
+    transform:translate(-50%,-50%); box-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer; z-index:5;
+    transition:left .3s ease, top .3s ease;
+  }
+  .token.movable{animation:tokenpulse 1s ease-in-out infinite;}
+  @keyframes tokenpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0.25);}50%{box-shadow:0 0 0 6px rgba(0,0,0,0);}}
+
+  .dice-row{
+    flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:16px;
+    padding:14px 20px calc(env(safe-area-inset-bottom,0px) + 16px);
+  }
+  .dice{
+    width:52px; height:52px; border-radius:14px; background:var(--white); border:2px solid var(--line);
+    display:grid; grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr 1fr; padding:8px; cursor:pointer;
+  }
+  .dice .pip{width:8px; height:8px; border-radius:50%; background:var(--ink); align-self:center; justify-self:center; opacity:0;}
+  .roll-btn{
+    background:var(--olive); color:var(--white); border:none; border-radius:100px;
+    padding:14px 26px; font-family:'Inter', sans-serif; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  .roll-btn:disabled{opacity:.5; cursor:default;}
+
+  .winner-banner{
+    position:absolute; inset:0; background:rgba(31,58,36,0.92); z-index:20;
+    display:none; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:30px;
+  }
+  .winner-banner.show{display:flex;}
+  .winner-banner h2{font-family:'Poppins', sans-serif; font-weight:800; font-size:22px; color:var(--white); margin-bottom:10px;}
+  .winner-banner p{font-size:13.5px; color:#C9E4B8; margin-bottom:22px;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device" style="--c-red:#C4483E; --c-green:#4C8B5A; --c-yellow:#D9A63C; --c-blue:#3E7CB1;">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Dashboard1.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Road Fun</h1>
+  </div>
+
+  <div class="tab-row">
+    <button class="active" id="tabMusic">🎵 Music</button>
+    <button id="tabLudo">🎲 Ludo</button>
+  </div>
+
+  <!-- ================= MUSIC VIEW ================= -->
+  <div class="view active" id="viewMusic">
+    <div class="track-list" id="trackList"></div>
+    <div class="mini-player">
+      <div class="mp-top">
+        <div class="mp-art" id="mpArt">🎧</div>
+        <div class="mp-info">
+          <b id="mpTitle">Pick a track</b>
+          <span id="mpArtist">Tap any song to start</span>
+        </div>
+        <div class="mp-controls">
+          <button id="mpPrev" aria-label="Previous"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+          <button class="mp-play" id="mpPlay" aria-label="Play">
+            <svg id="mpPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="var(--white)"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button id="mpNext" aria-label="Next"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+        </div>
+      </div>
+      <div class="mp-progress-row">
+        <span id="mpElapsed">0:00</span>
+        <div class="mp-track"><div class="mp-fill" id="mpFill"></div></div>
+        <span id="mpDuration">0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LUDO VIEW ================= -->
+  <div class="view" id="viewLudo">
+
+    <div class="ludo-setup" id="ludoSetup">
+      <h2>Ludo — pass &amp; play</h2>
+      <p>How many players tonight?</p>
+      <div class="pcount-row" id="pcountRow">
+        <button class="pcount-chip" data-n="2">2</button>
+        <button class="pcount-chip active" data-n="3">3</button>
+        <button class="pcount-chip" data-n="4">4</button>
+      </div>
+      <button class="roll-btn" id="startGameBtn">Start Game</button>
+    </div>
+
+    <div class="ludo-game" id="ludoGame" style="display:none;">
+      <div class="ludo-status">
+        <span id="turnLabel"><span class="turn-dot"></span>—</span>
+        <span id="rollHint" style="color:var(--gray); font-weight:600;"></span>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="board">
+          <div class="center-hub"></div>
+        </div>
+      </div>
+      <div class="dice-row">
+        <div class="dice" id="dice"></div>
+        <button class="roll-btn" id="rollBtn">Roll Dice</button>
+      </div>
+    </div>
+
+    <div class="winner-banner" id="winnerBanner">
+      <h2 id="winnerText">🎉 Red wins!</h2>
+      <p>Great game — want to go again?</p>
+      <button class="roll-btn" id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  // ================= TAB SWITCHING =================
+  const tabMusic = document.getElementById('tabMusic');
+  const tabLudo = document.getElementById('tabLudo');
+  const viewMusic = document.getElementById('viewMusic');
+  const viewLudo = document.getElementById('viewLudo');
+  tabMusic.addEventListener('click', () => {
+    tabMusic.classList.add('active'); tabLudo.classList.remove('active');
+    viewMusic.classList.add('active'); viewLudo.classList.remove('active');
+  });
+  tabLudo.addEventListener('click', () => {
+    tabLudo.classList.add('active'); tabMusic.classList.remove('active');
+    viewLudo.classList.add('active'); viewMusic.classList.remove('active');
+  });
+
+  // ================= MUSIC PLAYER (simulated playback) =================
+  // demo-only: no real audio files are loaded here. A real build would
+  // stream from a licensed catalog / music API instead of faking progress.
+  const tracks = [
+    { title:"Lagos Nights", artist:"Kunle B.", dur:204, color:"#7C9473", emoji:"🌃" },
+    { title:"Highway Feeling", artist:"Amaka O.", dur:187, color:"#B08B3E", emoji:"🛣️" },
+    { title:"Slow Traffic", artist:"The Danfo Boys", dur:221, color:"#3E7CB1", emoji:"🚕" },
+    { title:"Window Seat", artist:"Ijeoma", dur:198, color:"#C4483E", emoji:"🪟" },
+    { title:"Long Road Home", artist:"Tunde & The Crew", dur:245, color:"#66805C", emoji:"🌅" }
+  ];
+
+  const trackList = document.getElementById('trackList');
+  tracks.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.i = i;
+    row.innerHTML = `
+      <div class="track-art" style="background:${t.color};">${t.emoji}</div>
+      <div class="track-info"><b>${t.title}</b><span>${t.artist}</span></div>
+      <div class="eq" style="display:none;"><span></span><span></span><span></span></div>
+      <div class="track-dur">${fmt(t.dur)}</div>
+    `;
+    row.addEventListener('click', () => loadTrack(i, true));
+    trackList.appendChild(row);
+  });
+
+  function fmt(s){ const m = Math.floor(s/60); const r = Math.floor(s%60); return m + ':' + String(r).padStart(2,'0'); }
+
+  let current = 0, playing = false, elapsed = 0, timer = null;
+  const mpArt = document.getElementById('mpArt');
+  const mpTitle = document.getElementById('mpTitle');
+  const mpArtist = document.getElementById('mpArtist');
+  const mpPlayIcon = document.getElementById('mpPlayIcon');
+  const mpFill = document.getElementById('mpFill');
+  const mpElapsed = document.getElementById('mpElapsed');
+  const mpDuration = document.getElementById('mpDuration');
+
+  function loadTrack(i, autoplay){
+    current = i; elapsed = 0;
+    const t = tracks[i];
+    mpArt.textContent = t.emoji; mpArt.style.background = t.color;
+    mpTitle.textContent = t.title; mpArtist.textContent = t.artist;
+    mpDuration.textContent = fmt(t.dur);
+    mpFill.style.width = '0%'; mpElapsed.textContent = '0:00';
+    document.querySelectorAll('.track-row').forEach(r => {
+      const isCur = parseInt(r.dataset.i,10) === i;
+      r.classList.toggle('playing', isCur);
+      r.querySelector('.eq').style.display = isCur ? 'flex' : 'none';
+    });
+    if(autoplay) play(); else pause();
+  }
+  loadTrack(0, false);
+
+  function play(){
+    playing = true;
+    mpPlayIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+    clearInterval(timer);
+    timer = setInterval(() => {
+      elapsed++;
+      const t = tracks[current];
+      if(elapsed >= t.dur){ nextTrack(); return; }
+      mpFill.style.width = (elapsed / t.dur * 100) + '%';
+      mpElapsed.textContent = fmt(elapsed);
+    }, 1000);
+  }
+  function pause(){
+    playing = false;
+    mpPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    clearInterval(timer);
+  }
+  function nextTrack(){ loadTrack((current + 1) % tracks.length, true); }
+  function prevTrack(){ loadTrack((current - 1 + tracks.length) % tracks.length, true); }
+
+  document.getElementById('mpPlay').addEventListener('click', () => playing ? pause() : play());
+  document.getElementById('mpNext').addEventListener('click', nextTrack);
+  document.getElementById('mpPrev').addEventListener('click', prevTrack);
+
+  // ================= LUDO =================
+  const COLORS = [
+    { name:'Red', hex:'#C4483E' },
+    { name:'Green', hex:'#4C8B5A' },
+    { name:'Yellow', hex:'#D9A63C' },
+    { name:'Blue', hex:'#3E7CB1' }
+  ];
+  const YARD_POS = [ {x:12,y:12}, {x:88,y:12}, {x:88,y:88}, {x:12,y:88} ]; // top-left, top-right, bottom-right, bottom-left
+
+  function ringPosition(index){
+    const side = Math.floor(index / 13);
+    const t = (index % 13) / 13;
+    const inset = 12, span = 76;
+    let x, y;
+    if(side === 0){ x = inset + span * t; y = inset; }
+    else if(side === 1){ x = 88; y = inset + span * t; }
+    else if(side === 2){ x = 88 - span * t; y = 88; }
+    else { x = inset; y = 88 - span * t; }
+    return { x, y };
+  }
+  function homeStretchPosition(colorIdx, step){ // step 0-5
+    const start = ringPosition(colorIdx * 13);
+    const frac = (step + 1) / 7;
+    return { x: start.x + (50 - start.x) * frac, y: start.y + (50 - start.y) * frac };
+  }
+
+  let numPlayers = 3;
+  let players = []; // { colorIdx, tokens:[{state:'yard'|'active'|'homepath'|'home', steps, homeStep}] }
+  let currentPlayer = 0;
+  let diceValue = 1;
+  let rolledThisTurn = false;
+  let sixStreak = 0;
+
+  document.querySelectorAll('.pcount-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.pcount-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      numPlayers = parseInt(chip.dataset.n, 10);
+    });
+  });
+
+  document.getElementById('startGameBtn').addEventListener('click', startGame);
+  document.getElementById('playAgainBtn').addEventListener('click', () => {
+    document.getElementById('winnerBanner').classList.remove('show');
+    document.getElementById('ludoGame').style.display = 'none';
+    document.getElementById('ludoSetup').style.display = 'flex';
+  });
+
+  const board = document.getElementById('board');
+
+  function startGame(){
+    players = [];
+    for(let i = 0; i < numPlayers; i++){
+      players.push({ colorIdx:i, tokens:[0,1,2,3].map(() => ({ state:'yard', steps:0, homeStep:0 })) });
+    }
+    currentPlayer = 0; sixStreak = 0;
+    document.getElementById('ludoSetup').style.display = 'none';
+    document.getElementById('ludoGame').style.display = 'flex';
+    buildBoardStatic();
+    renderTokens();
+    updateStatus();
+  }
+
+  function buildBoardStatic(){
+    // clear previous static elements (keep center hub)
+    board.querySelectorAll('.yard-pod, .ring-cell, .home-dot, .token').forEach(el => el.remove());
+
+    // yard pods
+    for(let i = 0; i < 4; i++){
+      const pod = document.createElement('div');
+      pod.className = 'yard-pod';
+      pod.style.left = (YARD_POS[i].x - 15) + '%';
+      pod.style.top = (YARD_POS[i].y - 15) + '%';
+      pod.style.background = COLORS[i].hex + '33';
+      for(let s = 0; s < 4; s++){
+        const slot = document.createElement('div');
+        slot.className = 'yard-slot';
+        pod.appendChild(slot);
+      }
+      board.appendChild(pod);
+    }
+
+    // ring cells
+    for(let i = 0; i < 52; i++){
+      const p = ringPosition(i);
+      const cell = document.createElement('div');
+      cell.className = 'ring-cell';
+      cell.style.left = p.x + '%'; cell.style.top = p.y + '%';
+      if(i % 13 === 0){
+        cell.classList.add('start');
+        cell.style.borderColor = COLORS[i / 13].hex;
+      }
+      board.appendChild(cell);
+    }
+
+    // home stretch dots
+    for(let c = 0; c < 4; c++){
+      for(let s = 0; s < 6; s++){
+        const p = homeStretchPosition(c, s);
+        const dot = document.createElement('div');
+        dot.className = 'home-dot';
+        dot.style.left = p.x + '%'; dot.style.top = p.y + '%';
+        dot.style.background = COLORS[c].hex;
+        board.appendChild(dot);
+      }
+    }
+  }
+
+  function tokenPosition(colorIdx, token){
+    if(token.state === 'yard'){
+      // spread 4 tokens slightly within yard pod
+      return null;
+    }
+    if(token.state === 'active'){
+      const globalPos = (colorIdx * 13 + token.steps) % 52;
+      return ringPosition(globalPos);
+    }
+    if(token.state === 'homepath'){
+      return homeStretchPosition(colorIdx, token.homeStep);
+    }
+    return { x:50, y:50 }; // home / finished
+  }
+
+  function renderTokens(){
+    board.querySelectorAll('.token').forEach(el => el.remove());
+    players.forEach((player, pIdx) => {
+      player.tokens.forEach((token, tIdx) => {
+        const el = document.createElement('div');
+        el.className = 'token';
+        el.style.background = COLORS[player.colorIdx].hex;
+        el.dataset.player = pIdx; el.dataset.token = tIdx;
+
+        if(token.state === 'yard'){
+          const base = YARD_POS[player.colorIdx];
+          const dx = (tIdx % 2 === 0 ? -5 : 5);
+          const dy = (tIdx < 2 ? -5 : 5);
+          el.style.left = (base.x + dx) + '%'; el.style.top = (base.y + dy) + '%';
+        } else {
+          const pos = tokenPosition(player.colorIdx, token);
+          el.style.left = pos.x + '%'; el.style.top = pos.y + '%';
+        }
+
+        if(pIdx === currentPlayer && isMovable(player, token, diceValue) && rolledThisTurn){
+          el.classList.add('movable');
+        }
+        el.addEventListener('click', () => attemptMove(pIdx, tIdx));
+        board.appendChild(el);
+      });
+    });
+  }
+
+  function isMovable(player, token, dice){
+    if(token.state === 'home') return false;
+    if(token.state === 'yard') return dice === 6;
+    if(token.state === 'active'){
+      const total = token.steps + dice;
+      return total <= 56; // allow entering/finishing home path
+    }
+    if(token.state === 'homepath'){
+      return true; // any roll can finish the home stretch (simplified — no exact-count requirement)
+    }
+    return false;
+  }
+
+  function anyMovable(){
+    const player = players[currentPlayer];
+    return player.tokens.some(t => isMovable(player, t, diceValue));
+  }
+
+  function attemptMove(pIdx, tIdx){
+    if(pIdx !== currentPlayer || !rolledThisTurn) return;
+    const player = players[currentPlayer];
+    const token = player.tokens[tIdx];
+    if(!isMovable(player, token, diceValue)) return;
+
+    if(token.state === 'yard'){
+      token.state = 'active'; token.steps = 0;
+    } else if(token.state === 'active'){
+      const total = token.steps + diceValue;
+      if(total < 51){
+        token.steps = total;
+        checkCapture(player, token);
+      } else if(total < 57){
+        token.state = 'homepath';
+        token.homeStep = total - 51;
+        if(token.homeStep >= 6){ token.state = 'home'; }
+      }
+    } else if(token.state === 'homepath'){
+      token.homeStep += diceValue;
+      if(token.homeStep >= 6){ token.state = 'home'; }
+    }
+
+    renderTokens();
+
+    if(player.tokens.every(t => t.state === 'home')){
+      showWinner(player);
+      return;
+    }
+
+    if(diceValue === 6 && sixStreak < 3){
+      rolledThisTurn = false;
+      updateStatus();
+    } else {
+      endTurn();
+    }
+  }
+
+  function checkCapture(player, movedToken){
+    const globalPos = (player.colorIdx * 13 + movedToken.steps) % 52;
+    const isSafe = globalPos % 13 === 0;
+    if(isSafe) return;
+    players.forEach((other, oIdx) => {
+      if(oIdx === currentPlayer) return;
+      other.tokens.forEach(ot => {
+        if(ot.state === 'active'){
+          const otherGlobal = (other.colorIdx * 13 + ot.steps) % 52;
+          if(otherGlobal === globalPos){
+            ot.state = 'yard'; ot.steps = 0;
+          }
+        }
+      });
+    });
+  }
+
+  function endTurn(){
+    sixStreak = 0;
+    currentPlayer = (currentPlayer + 1) % players.length;
+    rolledThisTurn = false;
+    updateStatus();
+  }
+
+  function updateStatus(){
+    const c = COLORS[players[currentPlayer].colorIdx];
+    document.getElementById('turnLabel').innerHTML =
+      `<span class="turn-dot" style="background:${c.hex};"></span>${c.name}'s turn`;
+    document.getElementById('rollHint').textContent = rolledThisTurn ? 'Tap a glowing token to move' : 'Tap the dice to roll';
+    renderTokens();
+  }
+
+  const diceEl = document.getElementById('dice');
+  const DICE_PIPS = {
+    1: [4], 2: [0,8], 3: [0,4,8], 4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8]
+  };
+  function renderDice(value){
+    diceEl.innerHTML = '';
+    for(let i = 0; i < 9; i++){
+      const pip = document.createElement('div');
+      pip.className = 'pip';
+      if(DICE_PIPS[value].includes(i)) pip.style.opacity = '1';
+      diceEl.appendChild(pip);
+    }
+  }
+  renderDice(1);
+
+  function rollDice(){
+    if(rolledThisTurn) return;
+    diceValue = 1 + Math.floor(Math.random() * 6);
+    renderDice(diceValue);
+    rolledThisTurn = true;
+    if(diceValue === 6) sixStreak++; else sixStreak = 0;
+
+    if(!anyMovable()){
+      updateStatus();
+      setTimeout(() => { if(diceValue === 6 && sixStreak < 3){ rolledThisTurn = false; updateStatus(); } else { endTurn(); } }, 700);
+      return;
+    }
+    updateStatus();
+  }
+  document.getElementById('rollBtn').addEventListener('click', rollDice);
+  diceEl.addEventListener('click', rollDice);
+
+  function showWinner(player){
+    const c = COLORS[player.colorIdx];
+    document.getElementById('winnerText').textContent = `🎉 ${c.name} wins!`;
+    document.getElementById('winnerBanner').classList.add('show');
+  }
+})();
+</script>
+
+</body>
+</html>

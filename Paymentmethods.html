@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Payment Methods</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --input-bg:#E4E2D8;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 14px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:21px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+
+  .section-label{font-family:'Poppins', sans-serif; font-weight:700; font-size:15px; margin:20px 0 10px;}
+  .section-label:first-of-type{margin-top:4px;}
+  .section-sub{font-size:12px; color:var(--gray); margin:-6px 0 12px;}
+
+  .card-row{
+    display:flex; align-items:center; gap:12px;
+    background:var(--mint);
+    border:1.5px solid var(--mint-line);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+  }
+  .card-row.default{border-color:var(--olive);}
+  .brand-badge{
+    width:44px; height:30px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:10px; color:var(--white);
+    flex-shrink:0; letter-spacing:.02em;
+  }
+  .card-info{flex:1;}
+  .card-info b{font-size:14px; display:block;}
+  .card-info span{font-size:11.5px; color:var(--gray);}
+  .default-badge{
+    font-size:10px; font-weight:700; color:var(--olive-dark);
+    background:var(--white); padding:3px 8px; border-radius:100px; margin-left:6px;
+  }
+  .card-actions{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .icon-mini{
+    width:30px; height:30px; border-radius:50%; border:none; background:var(--white);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .set-default-btn{
+    font-size:11px; font-weight:700; color:var(--olive-dark);
+    background:none; border:none; cursor:pointer; text-decoration:underline;
+    white-space:nowrap;
+  }
+
+  .add-card-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%;
+    border:1.6px dashed var(--mint-line);
+    border-radius:16px;
+    padding:14px;
+    background:none;
+    color:var(--olive-dark);
+    font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px;
+    cursor:pointer;
+    margin-bottom:8px;
+  }
+
+  .add-form{
+    display:none;
+    background:var(--white);
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .add-form.open{display:block;}
+  .add-form input{
+    width:100%;
+    background:var(--input-bg);
+    border:1.5px solid transparent;
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    outline:none;
+    margin-bottom:10px;
+  }
+  .add-form input:focus{border-color:var(--olive); background:var(--white);}
+  .add-form .row2{display:flex; gap:10px;}
+  .add-form .row2 input{flex:1;}
+  .save-card-btn{
+    width:100%;
+    background:var(--olive); color:var(--white);
+    border:none; border-radius:100px;
+    padding:12px; font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px;
+    cursor:pointer;
+  }
+  .save-card-btn:hover{background:var(--olive-dark);}
+
+  .alt-row{
+    display:flex; align-items:center; gap:12px;
+    padding:12px 2px;
+    border-bottom:1px solid var(--line);
+  }
+  .alt-row:last-child{border-bottom:none;}
+  .alt-row .ico{width:34px; height:34px; border-radius:10px; background:var(--mint); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+  .alt-row .txt b{font-size:13.5px; display:block;}
+  .alt-row .txt span{font-size:11.5px; color:var(--gray);}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Setting.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Payment Methods</h1>
+  </div>
+
+  <div class="scroll">
+
+    <div class="section-label">Saved cards</div>
+    <div id="cardList"></div>
+
+    <button class="add-card-btn" id="showAddForm">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add a new card
+    </button>
+
+    <div class="add-form" id="addForm">
+      <input type="text" id="cardNumber" placeholder="Card number" inputmode="numeric" maxlength="19">
+      <div class="row2">
+        <input type="text" id="cardExpiry" placeholder="MM/YY" inputmode="numeric" maxlength="5">
+        <input type="text" id="cardCvv" placeholder="CVV" inputmode="numeric" maxlength="3">
+      </div>
+      <input type="text" id="cardName" placeholder="Name on card">
+      <button class="save-card-btn" id="saveCardBtn">Save card</button>
+    </div>
+
+    <div class="section-label">Other ways to pay</div>
+    <div class="section-sub">Available at checkout alongside your saved cards.</div>
+    <div class="alt-row"><div class="ico">🏦</div><div class="txt"><b>Bank Transfer</b><span>Pay directly from your bank app</span></div></div>
+    <div class="alt-row"><div class="ico">📱</div><div class="txt"><b>USSD</b><span>Dial a code from any phone, no data needed</span></div></div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  let cards = [
+    { brand:'VISA', color:'#2F6B3C', last4:'4242', expiry:'08/27', name:'Chidi A.', default:true },
+    { brand:'MASTERCARD', color:'#3A6E8F', last4:'8891', expiry:'02/26', name:'Chidi A.', default:false }
+  ];
+
+  const cardList = document.getElementById('cardList');
+
+  function render(){
+    cardList.innerHTML = '';
+    cards.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'card-row' + (c.default ? ' default' : '');
+      row.innerHTML = `
+        <div class="brand-badge" style="background:${c.color};">${c.brand === 'MASTERCARD' ? 'MC' : c.brand}</div>
+        <div class="card-info">
+          <b>•••• ${c.last4} ${c.default ? '<span class=\"default-badge\">Default</span>' : ''}</b>
+          <span>Expires ${c.expiry} · ${c.name}</span>
+        </div>
+        <div class="card-actions">
+          ${!c.default ? `<button class="set-default-btn" data-i="${i}">Set default</button>` : ''}
+          <button class="icon-mini" data-remove="${i}" aria-label="Remove card">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </button>
+        </div>`;
+      cardList.appendChild(row);
+    });
+
+    cardList.querySelectorAll('.set-default-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i, 10);
+        cards.forEach((c, idx) => c.default = idx === i);
+        render();
+      });
+    });
+    cardList.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.remove, 10);
+        const wasDefault = cards[i].default;
+        cards.splice(i, 1);
+        if(wasDefault && cards.length) cards[0].default = true;
+        render();
+      });
+    });
+  }
+
+  const addForm = document.getElementById('addForm');
+  document.getElementById('showAddForm').addEventListener('click', () => {
+    addForm.classList.toggle('open');
+  });
+
+  document.getElementById('saveCardBtn').addEventListener('click', () => {
+    const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const expiry = document.getElementById('cardExpiry').value.trim();
+    const name = document.getElementById('cardName').value.trim() || 'Cardholder';
+    if(num.length < 12 || !expiry){
+      alert('Enter a valid card number and expiry to continue.');
+      return;
+    }
+    // demo-only: this stores the card in memory for this page view only.
+    // Replace with a real tokenization call to your payment processor.
+    cards.push({
+      brand: num.startsWith('5') ? 'MASTERCARD' : 'VISA',
+      color: num.startsWith('5') ? '#3A6E8F' : '#2F6B3C',
+      last4: num.slice(-4),
+      expiry: expiry,
+      name: name,
+      default: false
+    });
+    document.getElementById('cardNumber').value = '';
+    document.getElementById('cardExpiry').value = '';
+    document.getElementById('cardCvv').value = '';
+    document.getElementById('cardName').value = '';
+    addForm.classList.remove('open');
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

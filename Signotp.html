@@ -1,0 +1,334 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Verify Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --input-bg:#E4E2D8;
+    --line:#D8D5C8;
+    --white:#FFFFFF;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    padding:22px 20px 6px;
+    flex-shrink:0;
+  }
+  .back-btn{
+    width:34px; height:34px;
+    border:none; background:none;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+  }
+
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    padding:8px 30px 30px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .art-wrap{
+    width:120px; height:120px;
+    border-radius:50%;
+    background:var(--mint);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:14px auto 26px;
+    flex-shrink:0;
+  }
+  .art-wrap svg{width:54px; height:54px;}
+
+  h1{
+    font-family:'Poppins', sans-serif;
+    font-weight:800;
+    font-size:24px;
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .subtext{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--gray);
+    text-align:center;
+    max-width:290px;
+    margin:0 auto 28px;
+  }
+  .subtext b{color:var(--ink);}
+
+  .otp-row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .otp-box{
+    width:46px; height:56px;
+    text-align:center;
+    font-family:'Poppins', sans-serif;
+    font-size:22px;
+    font-weight:700;
+    color:var(--ink);
+    background:var(--input-bg);
+    border:1.5px solid transparent;
+    border-radius:14px;
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .otp-box:focus{border-color:var(--olive); background:var(--white);}
+  .otp-box.filled{background:var(--white); border-color:var(--mint-line);}
+  .otp-box.error{border-color:var(--red);}
+
+  .error-msg{
+    font-size:12.5px;
+    color:var(--red);
+    text-align:center;
+    margin-bottom:14px;
+    display:none;
+  }
+  .error-msg.show{display:block;}
+
+  .btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    padding:16px 20px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+    text-decoration:none;
+    margin-top:12px;
+  }
+  .btn-solid{
+    background:var(--olive);
+    color:var(--white);
+    box-shadow:0 12px 24px rgba(124,148,115,0.35);
+  }
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:0.55; cursor:default; transform:none;}
+
+  .resend-row{
+    margin-top:22px;
+    text-align:center;
+    font-size:13.5px;
+    color:var(--gray);
+  }
+  .resend-row button{
+    background:none;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--ink);
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+  .resend-row button:disabled{
+    color:var(--gray);
+    text-decoration:none;
+    cursor:default;
+  }
+
+  .home-indicator{
+    width:120px; height:4px;
+    background:var(--ink);
+    opacity:0.2;
+    border-radius:10px;
+    margin:0 auto 12px;
+    flex-shrink:0;
+  }
+
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+  @media (max-width:360px){
+    .otp-box{width:40px; height:50px; font-size:19px;}
+    .otp-row{gap:7px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='signup.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+  </div>
+
+  <div class="scroll">
+
+    <div class="art-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10" width="16" height="11" rx="2.4"/>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+        <circle cx="12" cy="15" r="1.6" fill="var(--olive-dark)" stroke="none"/>
+        <path d="M12 16.6V18"/>
+      </svg>
+    </div>
+
+    <h1>Verify your account</h1>
+    <p class="subtext">Enter the 6-digit code we sent to <b id="destText">your email</b> to finish setting up your account.</p>
+
+    <form id="otpForm">
+      <div class="otp-row" id="otpRow">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+      </div>
+      <p class="error-msg" id="errorMsg">Enter all 6 digits to continue.</p>
+
+      <button type="submit" class="btn btn-solid" id="verifyBtn" disabled>Verify &amp; Continue</button>
+    </form>
+
+    <div class="resend-row">
+      <span id="resendText">Didn't get a code? Resend in <b id="timer">0:30</b></span>
+      <button type="button" id="resendBtn" style="display:none;">Resend code</button>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  // pull the email along from the sign-up page if it was passed as ?email=
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('email');
+  if(email){ document.getElementById('destText').textContent = email; }
+
+  const boxes = Array.from(document.querySelectorAll('.otp-box'));
+  const verifyBtn = document.getElementById('verifyBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const form = document.getElementById('otpForm');
+
+  function currentCode(){ return boxes.map(b => b.value).join(''); }
+
+  function refreshState(){
+    const complete = currentCode().length === 6;
+    verifyBtn.disabled = !complete;
+    if(complete) errorMsg.classList.remove('show');
+  }
+
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '').slice(0, 1);
+      box.classList.toggle('filled', box.value !== '');
+      box.classList.remove('error');
+      if(box.value && i < boxes.length - 1){ boxes[i + 1].focus(); }
+      refreshState();
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !box.value && i > 0){ boxes[i - 1].focus(); }
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const digits = (e.clipboardData.getData('text').match(/\d/g) || []).slice(0, 6);
+      digits.forEach((d, idx) => { if(boxes[idx]){ boxes[idx].value = d; boxes[idx].classList.add('filled'); } });
+      const next = boxes[Math.min(digits.length, boxes.length - 1)];
+      next.focus();
+      refreshState();
+    });
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if(currentCode().length !== 6){
+      errorMsg.classList.add('show');
+      boxes.forEach(b => { if(!b.value) b.classList.add('error'); });
+      return;
+    }
+    // demo-only: any 6 digits are accepted here.
+    // Replace this with a real call to verify the code against your backend,
+    // then only redirect once that call confirms success.
+    verifyBtn.textContent = 'Verifying…';
+    verifyBtn.disabled = true;
+    setTimeout(() => { window.location.href = 'Dashboard1.html'; }, 500);
+  });
+
+  // ---------- resend countdown ----------
+  let seconds = 30;
+  const timerEl = document.getElementById('timer');
+  const resendText = document.getElementById('resendText');
+  const resendBtn = document.getElementById('resendBtn');
+
+  function tick(){
+    seconds -= 1;
+    if(seconds <= 0){
+      resendText.style.display = 'none';
+      resendBtn.style.display = 'inline';
+      return;
+    }
+    timerEl.textContent = '0:' + String(seconds).padStart(2, '0');
+    setTimeout(tick, 1000);
+  }
+  setTimeout(tick, 1000);
+
+  resendBtn.addEventListener('click', () => {
+    // demo-only: trigger your real resend-code API call here
+    resendBtn.style.display = 'none';
+    resendText.style.display = 'inline';
+    seconds = 30;
+    timerEl.textContent = '0:30';
+    setTimeout(tick, 1000);
+  });
+})();
+</script>
+
+</body>
+</html>

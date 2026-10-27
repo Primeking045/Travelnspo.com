@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Driver Connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --road:#DCE3D6;
+    --road-line:#F3F1E6;
+    --park:#D6E4D1;
+    --water:#C9D9DC;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ---------- map backdrop ---------- */
+  .map-canvas{position:absolute; inset:0; background:var(--road); overflow:hidden;}
+  .map-svg{position:absolute; top:50%; left:50%; width:170%; height:170%; transform:translate(-50%,-50%);}
+  .me-dot{
+    position:absolute; width:16px; height:16px; border-radius:50%;
+    background:#4C86F0; border:3px solid var(--white);
+    box-shadow:0 0 0 6px rgba(76,134,240,0.25);
+    transform:translate(-50%,-50%);
+    top:62%; left:44%;
+    z-index:2;
+  }
+  .dest-pin{
+    position:absolute; transform:translate(-50%,-100%);
+    top:26%; left:64%;
+    z-index:2;
+    display:none;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+  }
+  .dest-pin.show{display:block;}
+  .dest-pin svg{width:34px; height:34px;}
+  .route-line{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    z-index:1;
+    display:none;
+  }
+  .route-line.show{display:block;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:absolute; top:0; left:0; right:0;
+    padding:20px 18px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    z-index:5;
+  }
+  .icon-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--white);
+    border:none;
+    box-shadow:0 6px 16px rgba(36,40,32,0.18);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .title-pill{
+    background:var(--white);
+    padding:9px 18px;
+    border-radius:100px;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    box-shadow:0 6px 16px rgba(36,40,32,0.18);
+  }
+
+  /* ---------- bottom sheet ---------- */
+  .sheet{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    background:var(--white);
+    border-radius:26px 26px 0 0;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.15);
+    z-index:6;
+    max-height:78%;
+    display:flex;
+    flex-direction:column;
+  }
+  .sheet-handle{width:38px; height:4px; background:var(--line); border-radius:10px; margin:14px auto 6px; flex-shrink:0;}
+  .sheet-scroll{overflow-y:auto; padding:6px 22px 24px;}
+
+  .state{display:none;}
+  .state.active{display:block;}
+
+  /* --- state: where to --- */
+  h2.sheet-title{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px; margin-bottom:14px;}
+  .addr-field{
+    display:flex; align-items:center; gap:12px;
+    background:var(--mint);
+    border-radius:14px;
+    padding:13px 16px;
+    margin-bottom:10px;
+  }
+  .addr-field .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .addr-field .dot.pickup{background:#4C86F0;}
+  .addr-field .dot.dest{background:var(--red);}
+  .addr-field input{
+    flex:1; border:none; background:none; outline:none;
+    font-family:'Inter', sans-serif; font-size:14px; color:var(--ink);
+  }
+  .addr-field input::placeholder{color:var(--gray);}
+
+  .recent-label{font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px;}
+  .recent-item{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 4px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .recent-item .ico{
+    width:34px; height:34px; border-radius:10px; background:var(--mint);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px;
+  }
+  .recent-item .txt b{display:block; font-size:14px;}
+  .recent-item .txt span{font-size:12px; color:var(--gray);}
+
+  /* --- state: choose ride --- */
+  .ride-option{
+    display:flex; align-items:center; gap:12px;
+    padding:13px 12px;
+    border-radius:16px;
+    border:1.6px solid var(--line);
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .ride-option.selected{border-color:var(--olive); background:var(--mint);}
+  .ride-option .emoji-badge{
+    width:44px; height:44px; border-radius:12px; background:var(--mint);
+    display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+  }
+  .ride-option.selected .emoji-badge{background:var(--white);}
+  .ride-option .info{flex:1;}
+  .ride-option .info b{font-size:14.5px; display:block;}
+  .ride-option .info span{font-size:12px; color:var(--gray);}
+  .ride-option .fare{text-align:right; flex-shrink:0;}
+  .ride-option .fare b{font-size:14px; display:block;}
+  .ride-option .fare span{font-size:10.5px; color:var(--gray);}
+
+  .fare-note{
+    font-size:11.5px;
+    color:var(--gray);
+    background:var(--mint);
+    border-radius:12px;
+    padding:10px 12px;
+    margin:4px 0 16px;
+    line-height:1.5;
+  }
+  .credit-banner{
+    display:flex; align-items:center; gap:10px;
+    background:var(--ink); color:var(--cream);
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:14px;
+    font-size:13px; font-weight:600;
+  }
+  .credit-banner .amt{color:var(--white); font-weight:800;}
+
+  /* --- state: searching --- */
+  .searching{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:14px 4px 6px;
+  }
+  .radar{
+    width:88px; height:88px; border-radius:50%;
+    background:var(--mint);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px;
+    position:relative;
+  }
+  .radar::before, .radar::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    border:2px solid var(--olive); opacity:0;
+    animation:ping 1.8s ease-out infinite;
+  }
+  .radar::after{animation-delay:.9s;}
+  @keyframes ping{
+    0%{transform:scale(0.6); opacity:0.6;}
+    100%{transform:scale(1.6); opacity:0;}
+  }
+  .radar svg{width:34px; height:34px; position:relative; z-index:1;}
+  .searching h3{font-family:'Poppins', sans-serif; font-weight:700; font-size:17px; margin-bottom:6px;}
+  .searching p{font-size:13.5px; color:var(--gray); max-width:250px;}
+
+  /* --- state: matched --- */
+  .driver-card{display:flex; align-items:center; gap:14px; padding:6px 2px 18px;}
+  .driver-avatar{
+    width:58px; height:58px; border-radius:50%;
+    background:var(--olive);
+    color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:700; font-size:20px;
+    flex-shrink:0;
+  }
+  .driver-info b{font-family:'Poppins', sans-serif; font-size:16.5px; display:block;}
+  .driver-info .rating{font-size:12.5px; color:var(--gray); margin-top:2px;}
+  .driver-info .car{font-size:13px; color:var(--ink); margin-top:4px; font-weight:600;}
+  .driver-info .plate{
+    display:inline-block; margin-top:4px;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:11.5px;
+    background:var(--ink); color:var(--cream);
+    padding:3px 8px; border-radius:6px; letter-spacing:.03em;
+  }
+  .eta-banner{
+    background:var(--mint);
+    border-radius:14px;
+    padding:12px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .eta-banner b{font-size:15px;}
+  .eta-banner span{font-size:11.5px; color:var(--gray);}
+  .pay-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--mint);
+    border-radius:12px;
+    padding:11px 14px;
+    margin-bottom:10px;
+    font-size:12.5px;
+    color:var(--gray);
+  }
+  .pay-row b{color:var(--ink);}
+  .pay-row button{
+    background:none; border:none; cursor:pointer;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:12px;
+    color:var(--olive-dark); text-decoration:underline;
+  }
+  .method-row{
+    display:flex; align-items:center; gap:10px;
+    border:1.6px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    cursor:pointer;
+  }
+  .method-row.selected{border-color:var(--olive); background:var(--mint);}
+  .method-brand{
+    width:36px; height:24px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:8.5px; color:var(--white);
+    flex-shrink:0;
+  }
+  .method-row .info{flex:1; font-size:12.5px; font-weight:600;}
+  .contact-row{display:flex; gap:10px; margin-bottom:14px;}
+  .contact-btn{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:12px; border-radius:100px; border:none; cursor:pointer;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:13.5px;
+  }
+  .contact-btn.call{background:var(--olive); color:var(--white);}
+  .contact-btn.msg{background:var(--mint); color:var(--ink);}
+  .cancel-link{
+    display:block; text-align:center; color:var(--red); font-size:13.5px; font-weight:700;
+    background:none; border:none; cursor:pointer; margin:0 auto; text-decoration:underline;
+  }
+
+  /* --- state: trip in progress --- */
+  .trip-status{
+    display:flex; align-items:center; gap:10px;
+    background:var(--mint); border-radius:14px; padding:12px 14px; margin-bottom:16px;
+  }
+  .trip-status .pulse{
+    width:10px; height:10px; border-radius:50%; background:var(--olive);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .trip-status b{font-size:13.5px;}
+
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35);}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:.5; cursor:default; transform:none;}
+  .btn-ghost{background:var(--mint); color:var(--ink); margin-top:10px;}
+
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="map-canvas">
+    <svg class="map-svg" viewBox="0 0 400 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="800" fill="var(--road)"/>
+      <rect x="20" y="60" width="140" height="150" rx="18" fill="var(--park)"/>
+      <path d="M260 0 C300 60 220 120 270 200 C310 260 260 320 300 400 L400 400 L400 0 Z" fill="var(--water)"/>
+      <g stroke="var(--road-line)" stroke-width="14" stroke-linecap="round">
+        <line x1="0" y1="230" x2="400" y2="230"/>
+        <line x1="0" y1="420" x2="400" y2="420"/>
+        <line x1="0" y1="610" x2="400" y2="610"/>
+        <line x1="90" y1="0" x2="90" y2="800"/>
+        <line x1="210" y1="0" x2="210" y2="800"/>
+        <line x1="330" y1="0" x2="330" y2="800"/>
+      </g>
+      <g stroke="var(--road-line)" stroke-width="7" stroke-linecap="round" opacity="0.8">
+        <line x1="0" y1="130" x2="400" y2="130"/>
+        <line x1="0" y1="320" x2="400" y2="320"/>
+        <line x1="0" y1="510" x2="400" y2="510"/>
+        <line x1="0" y1="700" x2="400" y2="700"/>
+        <line x1="150" y1="0" x2="150" y2="800"/>
+        <line x1="270" y1="0" x2="270" y2="800"/>
+      </g>
+      <g fill="#CFD6C8">
+        <rect x="30" y="250" width="40" height="40" rx="6"/>
+        <rect x="110" y="260" width="60" height="30" rx="6"/>
+        <rect x="230" y="250" width="50" height="45" rx="6"/>
+        <rect x="30" y="440" width="45" height="45" rx="6"/>
+        <rect x="230" y="440" width="55" height="35" rx="6"/>
+      </g>
+    </svg>
+
+    <svg class="route-line" id="routeLine" viewBox="0 0 400 800" xmlns="http://www.w3.org/2000/svg">
+      <path d="M176 496 C 220 420, 240 300, 256 208" fill="none" stroke="var(--ink)" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round"/>
+    </svg>
+
+    <div class="me-dot"></div>
+    <div class="dest-pin" id="destPin">
+      <svg viewBox="0 0 24 24" fill="var(--red)" stroke="var(--white)" stroke-width="1"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z"/><circle cx="12" cy="10" r="3" fill="var(--white)"/></svg>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <button class="icon-btn" aria-label="Back" onclick="window.location.href='Dashboard1.html'">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <span class="title-pill">Driver Connect</span>
+    <span style="width:38px;"></span>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-scroll">
+
+      <!-- STATE 1: where to -->
+      <div class="state active" id="stateWhereTo">
+        <h2 class="sheet-title">Where are you headed?</h2>
+
+        <div class="addr-field">
+          <span class="dot pickup"></span>
+          <input type="text" id="pickupInput" value="Current location">
+        </div>
+        <div class="addr-field">
+          <span class="dot dest"></span>
+          <input type="text" id="destInput" placeholder="Enter destination">
+        </div>
+
+        <div class="recent-label">Recent</div>
+        <div class="recent-item" data-dest="Murtala Muhammed Airport, Lagos"><span class="ico">✈️</span><span class="txt"><b>Murtala Muhammed Airport</b><span>Ikeja, Lagos</span></span></div>
+        <div class="recent-item" data-dest="Lekki Phase 1, Lagos"><span class="ico">🏙️</span><span class="txt"><b>Lekki Phase 1</b><span>Lekki, Lagos</span></span></div>
+        <div class="recent-item" data-dest="Ibadan Motor Park"><span class="ico">🚌</span><span class="txt"><b>Ibadan Motor Park</b><span>Ibadan, Oyo</span></span></div>
+
+        <button class="btn btn-solid" id="findRidesBtn" style="margin-top:18px;" disabled>Find rides</button>
+      </div>
+
+      <!-- STATE 2: choose ride -->
+      <div class="state" id="stateChooseRide">
+        <h2 class="sheet-title">Choose a ride</h2>
+
+        <p class="fare-note" id="tripSummary" style="margin-top:0;"></p>
+
+        <div class="credit-banner" id="creditBanner" style="display:none;"></div>
+
+        <div class="ride-option" data-name="Okada" data-fare="₦800–1,200" data-eta="2 min">
+          <div class="emoji-badge">🏍️</div>
+          <div class="info"><b>Okada</b><span>1 seat · fastest through traffic</span></div>
+          <div class="fare"><b>₦800–1,200</b><span>2 min away</span></div>
+        </div>
+        <div class="ride-option" data-name="Keke" data-fare="₦500–900" data-eta="4 min">
+          <div class="emoji-badge">🛺</div>
+          <div class="info"><b>Keke</b><span>3 seats · shared or private</span></div>
+          <div class="fare"><b>₦500–900</b><span>4 min away</span></div>
+        </div>
+        <div class="ride-option selected" data-name="Car · Economy" data-fare="₦2,500–3,500" data-eta="5 min">
+          <div class="emoji-badge">🚗</div>
+          <div class="info"><b>Car · Economy</b><span>4 seats · AC, budget-friendly</span></div>
+          <div class="fare"><b>₦2,500–3,500</b><span>5 min away</span></div>
+        </div>
+        <div class="ride-option" data-name="Car · Comfort" data-fare="₦4,000–5,500" data-eta="6 min">
+          <div class="emoji-badge">🚙</div>
+          <div class="info"><b>Car · Comfort</b><span>4 seats · newer, more room</span></div>
+          <div class="fare"><b>₦4,000–5,500</b><span>6 min away</span></div>
+        </div>
+
+        <p class="fare-note">Fares are based on distance and trip time (base fee + per km + per minute). Your driver confirms the final price before you ride.</p>
+
+        <button class="btn btn-solid" id="requestBtn">Request Car · Economy</button>
+      </div>
+
+      <!-- STATE 3: searching -->
+      <div class="state" id="stateSearching">
+        <div class="searching">
+          <div class="radar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--olive-dark)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+          </div>
+          <h3>Finding your driver…</h3>
+          <p>Matching you with a nearby, verified driver. This usually takes under a minute.</p>
+        </div>
+        <button class="btn btn-ghost" id="cancelSearchBtn">Cancel</button>
+      </div>
+
+      <!-- STATE 4: matched -->
+      <div class="state" id="stateMatched">
+        <div class="eta-banner">
+          <div><b id="etaBig">3 min</b><span> away</span></div>
+          <span>Driver is on the way</span>
+        </div>
+        <div class="driver-card">
+          <div class="driver-avatar">EM</div>
+          <div class="driver-info">
+            <b>Emeka O.</b>
+            <div class="rating">★ 4.8 · 1,240 trips</div>
+            <div class="car">Toyota Corolla · Silver</div>
+            <span class="plate">LND 245 KJ</span>
+          </div>
+        </div>
+
+        <div class="pay-row">
+          <span>Paying with <b id="payMethodLabel">Visa •••• 4242</b></span>
+          <button type="button" id="changeMethodBtn">Change</button>
+        </div>
+        <div id="payMethodList" style="display:none; margin-bottom:12px;"></div>
+
+        <div class="contact-row">
+          <button class="contact-btn call" id="callDriverBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.8 2Z"/></svg>
+            Call
+          </button>
+          <button class="contact-btn msg" id="msgDriverBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Message
+          </button>
+        </div>
+        <button class="cancel-link" id="cancelMatchBtn">Cancel ride</button>
+      </div>
+
+      <!-- STATE 5: trip in progress -->
+      <div class="state" id="stateTrip">
+        <div class="trip-status">
+          <span class="pulse"></span>
+          <div><b>On the way to your destination</b></div>
+        </div>
+        <div class="driver-card">
+          <div class="driver-avatar">EM</div>
+          <div class="driver-info">
+            <b>Emeka O.</b>
+            <div class="rating">★ 4.8 · Toyota Corolla</div>
+            <span class="plate">LND 245 KJ</span>
+          </div>
+        </div>
+        <button class="btn btn-solid" id="endTripBtn">End Trip (demo)</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const states = ['stateWhereTo','stateChooseRide','stateSearching','stateMatched','stateTrip'];
+  function showState(id){
+    states.forEach(s => document.getElementById(s).classList.toggle('active', s === id));
+  }
+
+  // ---------- ride credit, passed in from the Rewards page ----------
+  const params = new URLSearchParams(window.location.search);
+  const credit = parseInt(params.get('credit') || '0', 10);
+  const creditBanner = document.getElementById('creditBanner');
+  if(credit > 0){
+    creditBanner.style.display = 'flex';
+    creditBanner.innerHTML = '💳 <span>Ride credit applied: <span class="amt">₦' + credit.toLocaleString('en-NG') + '</span> will come off your fare at checkout.</span>';
+  }
+
+  // ---------- state 1: where to ----------
+  const destInput = document.getElementById('destInput');
+  const findRidesBtn = document.getElementById('findRidesBtn');
+  const destPin = document.getElementById('destPin');
+  const routeLine = document.getElementById('routeLine');
+  const rideOptions = document.querySelectorAll('.ride-option');
+  const requestBtn = document.getElementById('requestBtn');
+
+  function setDestination(value){
+    destInput.value = value;
+    findRidesBtn.disabled = value.trim() === '';
+  }
+  destInput.addEventListener('input', () => { findRidesBtn.disabled = destInput.value.trim() === ''; });
+  document.querySelectorAll('.recent-item').forEach(item => {
+    item.addEventListener('click', () => setDestination(item.dataset.dest));
+  });
+
+  // ---------- distance-based pricing ----------
+  // fare = base + (per km x distance) + (per minute x trip time), never below minFare
+  const RATES = {
+    'Okada':         { base:200, km:90,  min:8,  minFare:500,  speed:0.85 },
+    'Keke':          { base:150, km:70,  min:6,  minFare:400,  speed:1.2  },
+    'Car · Economy': { base:500, km:200, min:15, minFare:1500, speed:1.0  },
+    'Car · Comfort': { base:800, km:300, min:20, minFare:2500, speed:1.0  }
+  };
+  const LAGOS = { lat:6.5244, lon:3.3792 }; // fallback pickup if location is blocked
+
+  function haversineKm(a, b){
+    const R = 6371, rad = x => x * Math.PI / 180;
+    const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function getCurrentPosition(){
+    return new Promise(resolve => {
+      if(!navigator.geolocation) return resolve(LAGOS);
+      navigator.geolocation.getCurrentPosition(
+        p => resolve({ lat:p.coords.latitude, lon:p.coords.longitude }),
+        () => resolve(LAGOS),
+        { timeout:5000 }
+      );
+    });
+  }
+
+  async function geocode(q){
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ng&q=' + encodeURIComponent(q));
+    const d = await r.json();
+    if(!d.length) throw new Error('Place not found');
+    return { lat:+d[0].lat, lon:+d[0].lon };
+  }
+
+  async function getRoute(a, b){
+    try{
+      const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`);
+      const d = await r.json();
+      return { km:d.routes[0].distance / 1000, mins:d.routes[0].duration / 60 };
+    }catch(e){
+      // fallback: straight-line x 1.3 road factor, ~30 km/h city speed
+      const km = haversineKm(a, b) * 1.3;
+      return { km, mins:km / 30 * 60 };
+    }
+  }
+
+  function calcFare(type, km, mins){
+    const r = RATES[type];
+    const raw = r.base + r.km * km + r.min * mins * r.speed;
+    const fare = Math.max(raw, r.minFare);
+    const round50 = n => Math.round(n / 50) * 50;
+    return {
+      low:round50(fare * 0.92),
+      high:round50(fare * 1.08),
+      mins:Math.max(1, Math.round(mins * r.speed))
+    };
+  }
+
+  const fmt = n => '₦' + n.toLocaleString('en-NG');
+
+  findRidesBtn.addEventListener('click', async () => {
+    findRidesBtn.disabled = true;
+    findRidesBtn.textContent = 'Calculating fare…';
+    try{
+      const pickupText = document.getElementById('pickupInput').value.trim();
+      const from = (pickupText && pickupText.toLowerCase() !== 'current location')
+        ? await geocode(pickupText)
+        : await getCurrentPosition();
+      const to = await geocode(destInput.value);
+      const route = await getRoute(from, to);
+
+      rideOptions.forEach(opt => {
+        const f = calcFare(opt.dataset.name, route.km, route.mins);
+        opt.dataset.fare = fmt(f.low) + '–' + fmt(f.high).replace('₦', '');
+        opt.querySelector('.fare b').textContent = opt.dataset.fare;
+        opt.querySelector('.fare span').textContent = f.mins + ' min trip';
+      });
+      document.getElementById('tripSummary').textContent =
+        route.km.toFixed(1) + ' km · about ' + Math.round(route.mins) + ' min drive';
+
+      destPin.classList.add('show');
+      routeLine.classList.add('show');
+      showState('stateChooseRide');
+    }catch(e){
+      alert("We couldn't find that destination. Try a more specific address.");
+    }
+    findRidesBtn.textContent = 'Find rides';
+    findRidesBtn.disabled = destInput.value.trim() === '';
+  });
+
+  // ---------- state 2: choose ride ----------
+  rideOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      rideOptions.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      requestBtn.textContent = 'Request ' + opt.dataset.name;
+    });
+  });
+
+  requestBtn.addEventListener('click', () => {
+    showState('stateSearching');
+    // demo-only: simulate matching with a driver after a short delay.
+    // Replace with a real dispatch call to your driver-matching backend.
+    setTimeout(() => { showState('stateMatched'); }, 2600);
+  });
+
+  document.getElementById('cancelSearchBtn').addEventListener('click', () => showState('stateChooseRide'));
+
+  // ---------- state 4: matched — inline payment method picker ----------
+  const rideMethods = [
+    { id:'visa', brand:'VISA', color:'#2F6B3C', label:'Visa •••• 4242' },
+    { id:'mc',   brand:'MC',   color:'#3A6E8F', label:'Mastercard •••• 8891' },
+    { id:'bank', brand:'🏦',   color:'#8A6A2F', label:'Bank Transfer' }
+  ];
+  let selectedRideMethod = 'visa';
+  const payMethodLabel = document.getElementById('payMethodLabel');
+  const payMethodList = document.getElementById('payMethodList');
+  const changeMethodBtn = document.getElementById('changeMethodBtn');
+
+  function renderRideMethods(){
+    payMethodList.innerHTML = '';
+    rideMethods.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'method-row' + (m.id === selectedRideMethod ? ' selected' : '');
+      row.innerHTML = `<div class="method-brand" style="background:${m.color};">${m.brand}</div><div class="info">${m.label}</div>`;
+      row.addEventListener('click', () => {
+        selectedRideMethod = m.id;
+        payMethodLabel.textContent = m.label;
+        renderRideMethods();
+        payMethodList.style.display = 'none';
+        changeMethodBtn.textContent = 'Change';
+      });
+      payMethodList.appendChild(row);
+    });
+  }
+  renderRideMethods();
+
+  changeMethodBtn.addEventListener('click', () => {
+    const open = payMethodList.style.display !== 'none';
+    payMethodList.style.display = open ? 'none' : 'block';
+    changeMethodBtn.textContent = open ? 'Change' : 'Close';
+  });
+
+  // ---------- call / message the driver ----------
+  const driverInfo = { name: 'Emeka O.', car: 'Toyota Corolla · Silver', plate: 'LND 245 KJ' };
+  function driverQuery(){
+    return '?name=' + encodeURIComponent(driverInfo.name) +
+           '&car=' + encodeURIComponent(driverInfo.car) +
+           '&plate=' + encodeURIComponent(driverInfo.plate);
+  }
+  document.getElementById('callDriverBtn').addEventListener('click', () => {
+    window.location.href = 'DriverCall.html' + driverQuery();
+  });
+  document.getElementById('msgDriverBtn').addEventListener('click', () => {
+    window.location.href = 'DriverChat.html' + driverQuery();
+  });
+
+  document.getElementById('cancelMatchBtn').addEventListener('click', () => {
+    destPin.classList.remove('show');
+    routeLine.classList.remove('show');
+    setDestination('');
+    showState('stateWhereTo');
+  });
+
+  // demo-only: simulate the driver arriving and the trip starting
+  function armTripStart(){
+    setTimeout(() => {
+      if(document.getElementById('stateMatched').classList.contains('active')){
+        showState('stateTrip');
+      }
+    }, 4000);
+  }
+  const matchedObserver = new MutationObserver(() => {
+    if(document.getElementById('stateMatched').classList.contains('active')) armTripStart();
+  });
+  matchedObserver.observe(document.getElementById('stateMatched'), { attributes:true, attributeFilter:['class'] });
+
+  // ---------- state 5: trip ----------
+  document.getElementById('endTripBtn').addEventListener('click', () => {
+    window.location.href = 'Dashboard1.html';
+  });
+})();
+</script>
+
+</body>
+</html>

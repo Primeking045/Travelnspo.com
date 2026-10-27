@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — New Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --bold:#28502F;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --input-bg:#E4E2D8;
+    --line:#E1DFD3;
+    --white:#FFFFFF;
+    --red:#C4483E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 12px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:20px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 20px;}
+  .state{display:none;}
+  .state.active{display:block;}
+
+  .field-label{font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.03em; margin:16px 0 8px;}
+  .field-label:first-child{margin-top:4px;}
+
+  input[type="text"], input[type="date"], input[type="number"], select{
+    width:100%;
+    background:var(--input-bg); border:1.5px solid transparent; border-radius:12px;
+    padding:13px 14px; font-family:'Inter', sans-serif; font-size:13.5px; color:var(--ink); outline:none;
+  }
+  input:focus, select:focus{border-color:var(--olive); background:var(--white);}
+
+  .reason-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .reason-chip{
+    border:1.6px solid var(--line); border-radius:12px; padding:10px 6px; text-align:center;
+    cursor:pointer; font-size:11.5px; font-weight:700; color:var(--ink);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .reason-chip .emoji{display:block; font-size:17px; margin-bottom:3px;}
+  .reason-chip.selected{border-color:var(--olive); background:var(--mint);}
+
+  .route-row{display:flex; align-items:center; gap:8px;}
+  .route-row input{flex:1;}
+  .swap-btn{
+    width:34px; height:34px; border-radius:50%; border:none; background:var(--mint);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+
+  .quick-row{display:flex; gap:8px; margin-top:8px;}
+  .quick-chip{
+    flex:1; background:var(--mint); border:1.5px solid var(--mint-line); border-radius:100px;
+    padding:8px 4px; text-align:center; font-size:11.5px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .quick-chip.active{background:var(--olive); color:var(--white); border-color:var(--olive);}
+
+  .toggle-field{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--mint); border-radius:14px; padding:13px 15px; margin-top:16px;
+  }
+  .toggle-field .txt b{font-size:13.5px; display:block;}
+  .toggle-field .txt span{font-size:11px; color:var(--gray);}
+  .switch{
+    width:44px; height:25px; border-radius:100px; background:var(--input-bg);
+    position:relative; flex-shrink:0; border:none; cursor:pointer; transition:background .2s ease;
+  }
+  .switch.on{background:var(--olive);}
+  .switch .knob{
+    position:absolute; top:2.5px; left:2.5px; width:20px; height:20px; border-radius:50%;
+    background:var(--white); box-shadow:0 1px 3px rgba(0,0,0,0.25); transition:transform .2s ease;
+  }
+  .switch.on .knob{transform:translateX(19px);}
+
+  .autosave-block{display:none; margin-top:4px;}
+  .autosave-block.show{display:block;}
+
+  .freq-row{display:flex; background:var(--mint); border-radius:100px; padding:4px; margin-top:4px;}
+  .freq-row button{
+    flex:1; border:none; background:none; padding:9px; border-radius:100px;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:12.5px; color:var(--gray); cursor:pointer;
+  }
+  .freq-row button.active{background:var(--olive); color:var(--white);}
+
+  .preview-card{
+    background:var(--bold); color:var(--white); border-radius:16px; padding:16px; margin-top:20px;
+  }
+  .preview-card .lbl{font-size:11px; color:rgba(255,255,255,0.65); margin-bottom:4px;}
+  .preview-card .line{display:flex; justify-content:space-between; padding:6px 0; font-size:12.5px; border-bottom:1px solid rgba(255,255,255,0.12);}
+  .preview-card .line:last-child{border-bottom:none;}
+  .preview-card .line b{color:#C9E4B8;}
+
+  .btn{
+    display:block; width:100%; text-align:center;
+    font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35); margin-top:22px;}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+  .btn-solid:disabled{opacity:.5; cursor:default; transform:none;}
+
+  .success-wrap{text-align:center; padding:20px 4px 4px;}
+  .check-circle{
+    width:78px; height:78px; border-radius:50%; background:var(--olive);
+    display:flex; align-items:center; justify-content:center; margin:6px auto 20px;
+  }
+  .check-circle svg{width:36px; height:36px;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" id="backBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>New Plan</h1>
+  </div>
+
+  <div class="scroll">
+
+    <div class="state active" id="stateForm">
+
+      <div class="field-label">1 · Plan name</div>
+      <input type="text" id="planName" placeholder="e.g. December trip to Abuja">
+
+      <div class="field-label">2 · Reason for the trip</div>
+      <div class="reason-grid" id="reasonGrid">
+        <div class="reason-chip" data-r="Business"><span class="emoji">💼</span>Business</div>
+        <div class="reason-chip" data-r="Family"><span class="emoji">❤️</span>Family</div>
+        <div class="reason-chip" data-r="Vacation"><span class="emoji">🧳</span>Vacation</div>
+        <div class="reason-chip" data-r="Education"><span class="emoji">🎓</span>Education</div>
+        <div class="reason-chip" data-r="Wedding"><span class="emoji">🎉</span>Wedding</div>
+        <div class="reason-chip" data-r="Other"><span class="emoji">✏️</span>Other</div>
+      </div>
+
+      <div class="field-label">3 · Route</div>
+      <div class="route-row">
+        <input type="text" id="fromInput" placeholder="From" value="Lagos">
+        <button class="swap-btn" id="swapBtn" aria-label="Swap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v14M3 13l4 4 4-4"/><path d="M17 21V7M13 11l4-4 4 4"/></svg>
+        </button>
+        <input type="text" id="toInput" placeholder="To" value="Abuja">
+      </div>
+
+      <div class="field-label">4 · Target travel date</div>
+      <input type="date" id="dateInput">
+
+      <div class="field-label">5 · Estimated total cost</div>
+      <input type="number" id="costInput" placeholder="₦0" inputmode="numeric" value="150000">
+      <div class="quick-row" id="quickRow">
+        <div class="quick-chip" data-amt="50000">₦50k</div>
+        <div class="quick-chip" data-amt="100000">₦100k</div>
+        <div class="quick-chip active" data-amt="150000">₦150k</div>
+        <div class="quick-chip" data-amt="300000">₦300k</div>
+      </div>
+
+      <div class="toggle-field">
+        <div class="txt"><b>Auto-save toward this plan</b><span>Move money automatically from your bank</span></div>
+        <button class="switch on" id="autosaveSwitch" role="switch" aria-checked="true"><span class="knob"></span></button>
+      </div>
+
+      <div class="autosave-block show" id="autosaveBlock">
+        <div class="field-label">6 · Save from</div>
+        <select id="bankSelect">
+          <option>GTBank •••• 4021</option>
+          <option>Access Bank •••• 7788</option>
+          <option>Zenith Bank •••• 3390</option>
+          <option>UBA •••• 1156</option>
+        </select>
+
+        <div class="field-label">7 · How often</div>
+        <div class="freq-row" id="freqRow">
+          <button type="button" class="active" data-f="weekly">Weekly</button>
+          <button type="button" data-f="monthly">Monthly</button>
+        </div>
+
+        <div class="field-label">8 · Amount per save</div>
+        <input type="number" id="perSaveInput" placeholder="₦0" inputmode="numeric">
+      </div>
+
+      <div class="preview-card" id="previewCard">
+        <div class="lbl">PROJECTION</div>
+        <div class="line"><span>Target</span><b id="pvTarget">₦150,000</b></div>
+        <div class="line"><span>By</span><b id="pvDate">—</b></div>
+        <div class="line"><span>Saving</span><b id="pvRate">—</b></div>
+        <div class="line"><span>Reaches goal by</span><b id="pvResult">—</b></div>
+      </div>
+
+      <button class="btn btn-solid" id="createBtn" disabled>Create Plan</button>
+    </div>
+
+    <div class="state" id="stateSuccess">
+      <div class="success-wrap">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2 style="font-family:'Poppins',sans-serif; font-weight:800; font-size:21px; margin-bottom:8px;" id="successTitle">Plan created</h2>
+        <p style="font-size:13.5px; color:var(--gray); line-height:1.55; margin-bottom:22px;" id="successSub">Your plan is set. We'll keep saving toward it automatically.</p>
+      </div>
+      <div class="preview-card" id="finalSummary"></div>
+      <button class="btn btn-solid" id="doneBtn">Back to Dashboard</button>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const state = { name:'', reason:null, from:'Lagos', to:'Abuja', date:'', cost:150000, autosave:true, bank:'', freq:'monthly', perSave:0 };
+
+  const planName = document.getElementById('planName');
+  const fromInput = document.getElementById('fromInput');
+  const toInput = document.getElementById('toInput');
+  const dateInput = document.getElementById('dateInput');
+  const costInput = document.getElementById('costInput');
+  const perSaveInput = document.getElementById('perSaveInput');
+  const bankSelect = document.getElementById('bankSelect');
+  const createBtn = document.getElementById('createBtn');
+
+  const today = new Date();
+  dateInput.min = today.toISOString().split('T')[0];
+  const defaultTarget = new Date(today); defaultTarget.setMonth(defaultTarget.getMonth() + 4);
+  dateInput.value = defaultTarget.toISOString().split('T')[0];
+  state.date = dateInput.value;
+
+  function money(n){ return '₦' + Math.max(0, Math.round(n)).toLocaleString('en-NG'); }
+
+  document.querySelectorAll('.reason-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      state.reason = chip.dataset.r;
+      validate();
+    });
+  });
+
+  planName.addEventListener('input', e => { state.name = e.target.value; validate(); });
+  fromInput.addEventListener('input', e => { state.from = e.target.value; validate(); });
+  toInput.addEventListener('input', e => { state.to = e.target.value; validate(); });
+  document.getElementById('swapBtn').addEventListener('click', () => {
+    const t = fromInput.value; fromInput.value = toInput.value; toInput.value = t;
+    state.from = fromInput.value; state.to = toInput.value;
+  });
+  dateInput.addEventListener('input', e => { state.date = e.target.value; updatePreview(); validate(); });
+  costInput.addEventListener('input', e => { state.cost = parseInt(e.target.value || '0', 10); syncQuickChips(); updatePreview(); validate(); });
+
+  document.querySelectorAll('.quick-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      costInput.value = chip.dataset.amt;
+      state.cost = parseInt(chip.dataset.amt, 10);
+      syncQuickChips();
+      updatePreview();
+      validate();
+    });
+  });
+  function syncQuickChips(){
+    document.querySelectorAll('.quick-chip').forEach(c => c.classList.toggle('active', parseInt(c.dataset.amt,10) === state.cost));
+  }
+
+  const autosaveSwitch = document.getElementById('autosaveSwitch');
+  const autosaveBlock = document.getElementById('autosaveBlock');
+  autosaveSwitch.addEventListener('click', () => {
+    state.autosave = !state.autosave;
+    autosaveSwitch.classList.toggle('on', state.autosave);
+    autosaveSwitch.setAttribute('aria-checked', state.autosave ? 'true' : 'false');
+    autosaveBlock.classList.toggle('show', state.autosave);
+    validate();
+  });
+
+  bankSelect.addEventListener('change', e => { state.bank = e.target.value; });
+  state.bank = bankSelect.value;
+
+  document.querySelectorAll('#freqRow button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#freqRow button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.freq = btn.dataset.f;
+      updatePreview();
+    });
+  });
+
+  perSaveInput.addEventListener('input', e => { state.perSave = parseInt(e.target.value || '0', 10); updatePreview(); });
+
+  function suggestedPerSave(){
+    const days = Math.max(1, Math.round((new Date(state.date) - today) / 86400000));
+    const periods = state.freq === 'weekly' ? Math.max(1, Math.round(days / 7)) : Math.max(1, Math.round(days / 30));
+    return Math.ceil(state.cost / periods / 100) * 100;
+  }
+
+  function updatePreview(){
+    if(!state.perSave){ perSaveInput.placeholder = money(suggestedPerSave()); }
+    document.getElementById('pvTarget').textContent = money(state.cost);
+    document.getElementById('pvDate').textContent = state.date ? new Date(state.date).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }) : '—';
+
+    const per = state.perSave || suggestedPerSave();
+    document.getElementById('pvRate').textContent = state.autosave ? (money(per) + ' / ' + (state.freq === 'weekly' ? 'week' : 'month')) : 'Manual saving';
+
+    if(state.autosave && per > 0){
+      const periodsNeeded = Math.ceil(state.cost / per);
+      const daysPerPeriod = state.freq === 'weekly' ? 7 : 30;
+      const reachDate = new Date(today.getTime() + periodsNeeded * daysPerPeriod * 86400000);
+      document.getElementById('pvResult').textContent = reachDate.toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' });
+    } else {
+      document.getElementById('pvResult').textContent = '—';
+    }
+  }
+  updatePreview();
+
+  function validate(){
+    createBtn.disabled = !(state.name.trim() && state.reason && state.from.trim() && state.to.trim() && state.date && state.cost > 0);
+  }
+  validate();
+
+  document.getElementById('backBtn').addEventListener('click', () => { window.location.href = 'Dashboard1.html'; });
+
+  createBtn.addEventListener('click', () => {
+    document.getElementById('successTitle').textContent = `"${state.name}" is set`;
+    document.getElementById('successSub').textContent = state.autosave
+      ? `We'll auto-save from ${state.bank} until you're ready to book.`
+      : `Track your progress toward this trip from your Savings page.`;
+
+    const per = state.perSave || suggestedPerSave();
+    document.getElementById('finalSummary').innerHTML = `
+      <div class="lbl">PLAN SUMMARY</div>
+      <div class="line"><span>Route</span><b>${state.from} → ${state.to}</b></div>
+      <div class="line"><span>Reason</span><b>${state.reason}</b></div>
+      <div class="line"><span>Target</span><b>${money(state.cost)}</b></div>
+      <div class="line"><span>Travel date</span><b>${new Date(state.date).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'})}</b></div>
+      <div class="line"><span>Auto-save</span><b>${state.autosave ? money(per) + ' / ' + (state.freq==='weekly'?'week':'month') : 'Off'}</b></div>
+    `;
+
+    document.getElementById('stateForm').classList.remove('active');
+    document.getElementById('stateSuccess').classList.add('active');
+  });
+
+  document.getElementById('doneBtn').addEventListener('click', () => { window.location.href = 'Dashboard1.html'; });
+})();
+</script>
+
+</body>
+</html>

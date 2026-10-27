@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Weather &amp; Road Conditions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --bold:#28502F;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --red:#C4483E;
+    --amber:#B08B3E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 14px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px;}
+
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+
+  .weather-card{
+    background:var(--bold); color:var(--white); border-radius:20px; padding:20px; margin-bottom:18px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .weather-card .loc{font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:4px;}
+  .weather-card .temp{font-family:'Poppins', sans-serif; font-weight:800; font-size:36px;}
+  .weather-card .cond{font-size:12.5px; color:#C9E4B8; margin-top:2px;}
+  .weather-card .emoji{font-size:48px;}
+  .weather-strip{display:flex; gap:8px; margin-top:16px;}
+  .weather-strip .hr{flex:1; text-align:center; background:rgba(255,255,255,0.08); border-radius:10px; padding:8px 4px;}
+  .weather-strip .hr .t{font-size:10px; color:rgba(255,255,255,0.6);}
+  .weather-strip .hr .e{font-size:16px; margin:4px 0;}
+  .weather-strip .hr .d{font-size:11px; font-weight:700;}
+
+  .filter-row{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto;}
+  .filter-chip{
+    flex-shrink:0; background:var(--mint); border:1.5px solid var(--mint-line);
+    border-radius:100px; padding:8px 14px; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; white-space:nowrap;
+  }
+  .filter-chip.active{background:var(--olive); color:var(--white); border-color:var(--olive);}
+
+  .section-label{font-family:'Poppins', sans-serif; font-weight:700; font-size:14px; margin:16px 0 8px;}
+  .section-label:first-of-type{margin-top:0;}
+
+  .alert-card{
+    display:flex; gap:12px; background:var(--white); border:1.5px solid var(--line);
+    border-radius:16px; padding:14px; margin-bottom:10px;
+  }
+  .alert-card .ico{
+    width:38px; height:38px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+  }
+  .alert-card.severe .ico{background:rgba(196,72,62,0.15);}
+  .alert-card.warn .ico{background:rgba(176,139,62,0.18);}
+  .alert-card.info .ico{background:var(--mint);}
+  .alert-card .body{flex:1; min-width:0;}
+  .alert-card .body b{font-size:13.5px; display:block;}
+  .alert-card .body p{font-size:11.5px; color:var(--gray); margin-top:3px; line-height:1.4;}
+  .alert-card .meta{font-size:10.5px; color:var(--gray); margin-top:6px; display:flex; gap:8px; align-items:center;}
+  .sev-badge{font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:100px;}
+  .sev-badge.severe{background:rgba(196,72,62,0.15); color:var(--red);}
+  .sev-badge.warn{background:rgba(176,139,62,0.2); color:var(--amber);}
+  .sev-badge.info{background:var(--mint); color:var(--olive-dark);}
+
+  .empty-state{display:none; text-align:center; padding:50px 20px; color:var(--gray);}
+  .empty-state.show{display:block;}
+  .empty-state .emoji{font-size:34px; margin-bottom:8px;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Dashboard1.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Weather &amp; Road Conditions</h1>
+  </div>
+
+  <div class="scroll">
+
+    <div class="weather-card">
+      <div>
+        <div class="loc">📍 Lagos, Nigeria</div>
+        <div class="temp">29°</div>
+        <div class="cond">Partly cloudy · Feels like 33°</div>
+      </div>
+      <div class="emoji">⛅</div>
+    </div>
+    <div class="weather-strip">
+      <div class="hr"><div class="t">Now</div><div class="e">⛅</div><div class="d">29°</div></div>
+      <div class="hr"><div class="t">1PM</div><div class="e">🌤️</div><div class="d">31°</div></div>
+      <div class="hr"><div class="t">3PM</div><div class="e">🌧️</div><div class="d">27°</div></div>
+      <div class="hr"><div class="t">5PM</div><div class="e">🌧️</div><div class="d">26°</div></div>
+      <div class="hr"><div class="t">7PM</div><div class="e">⛅</div><div class="d">25°</div></div>
+    </div>
+
+    <div class="filter-row" id="filterRow">
+      <div class="filter-chip active" data-f="all">All Alerts</div>
+      <div class="filter-chip" data-f="road">🚧 Road</div>
+      <div class="filter-chip" data-f="weather">🌧️ Weather</div>
+      <div class="filter-chip" data-f="plans">🧳 My Plans</div>
+    </div>
+
+    <div class="section-label">Active now</div>
+    <div id="alertList">
+      <div class="alert-card severe" data-cat="road">
+        <div class="ico">🚧</div>
+        <div class="body">
+          <b>Accident — Lagos–Ibadan Expressway</b>
+          <p>Multi-vehicle accident near Kilometer 25. One lane blocked, heavy delays reported.</p>
+          <div class="meta"><span class="sev-badge severe">Severe</span><span>12 min ago</span></div>
+        </div>
+      </div>
+      <div class="alert-card warn" data-cat="weather">
+        <div class="ico">🌧️</div>
+        <div class="body">
+          <b>Heavy rain expected, 3–6 PM</b>
+          <p>Affects your Lagos → Abuja route on Driver Connect. Consider leaving earlier.</p>
+          <div class="meta"><span class="sev-badge warn">Advisory</span><span>40 min ago</span></div>
+        </div>
+      </div>
+      <div class="alert-card warn" data-cat="road">
+        <div class="ico">🚦</div>
+        <div class="body">
+          <b>Hold-up — Third Mainland Bridge</b>
+          <p>Slow-moving traffic reported inbound toward Lagos Island. Expect 20+ min delay.</p>
+          <div class="meta"><span class="sev-badge warn">Moderate</span><span>1 hr ago</span></div>
+        </div>
+      </div>
+      <div class="alert-card info" data-cat="plans">
+        <div class="ico">🧳</div>
+        <div class="body">
+          <b>Weather looks good for "December trip to Abuja"</b>
+          <p>Clear skies forecast for your planned travel window — no advisories yet.</p>
+          <div class="meta"><span class="sev-badge info">Your plan</span><span>Today</span></div>
+        </div>
+      </div>
+      <div class="alert-card info" data-cat="weather">
+        <div class="ico">☀️</div>
+        <div class="body">
+          <b>Clear skies tomorrow</b>
+          <p>Good visibility expected across Lagos and the Lagos–Ibadan route all day.</p>
+          <div class="meta"><span class="sev-badge info">Info</span><span>2 hrs ago</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="emoji">🌤️</div>
+      <p>No alerts in this category right now.</p>
+    </div>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(function(){
+  const chips = document.querySelectorAll('.filter-chip');
+  const cards = document.querySelectorAll('.alert-card');
+  const emptyState = document.getElementById('emptyState');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const f = chip.dataset.f;
+      let visible = 0;
+      cards.forEach(card => {
+        const show = f === 'all' || card.dataset.cat === f;
+        card.style.display = show ? 'flex' : 'none';
+        if(show) visible++;
+      });
+      emptyState.classList.toggle('show', visible === 0);
+    });
+  });
+
+  // demo-only: real weather + a live map/route-alert feed would come from a
+  // weather API (e.g. OpenWeather) and a maps/traffic provider, filtered by
+  // the user's saved plans and current route.
+})();
+</script>
+
+</body>
+</html>

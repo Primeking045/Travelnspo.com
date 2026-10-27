@@ -1,0 +1,296 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Your Journey Starts Here</title>  <!-- Font Awesome for Icons -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+  />
+  
+  <style>
+    /* Global Reset & Page Background */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #dce3db; /* Soft muted sage/gray background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Container Card */
+    .signup-card {
+      background-color: #F5F3EA; /* Off-white background */
+      width: 100%;
+      max-width: 380px;
+      border-radius: 36px;
+      padding: 40px 28px 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+/* Logo Styling */
+    .logo-container {
+      margin-bottom: 0px;
+      width: 70%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-container img {
+      max-width: 150px;
+      height: 50%;
+    }
+
+    /* SVG Fallback / Vector Logo */
+    .logo-svg-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #2fd202, #85e800); /* Vibrant green gradient */
+      padding: 10px 24px;
+      border-radius: 18px;
+      color: #0d1e2b;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 4px 14px rgba(47, 210, 2, 0.35);
+    }
+
+    .logo-badge .highlight {
+      color: #ffffff;
+    }
+
+    .logo-badge .domain {
+      font-size: 14px;
+      font-weight: 700;
+      align-self: flex-end;
+      margin-bottom: 2px;
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2c332b;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #3b443a;
+      margin-bottom: 28px;
+    }
+
+    /* Form & Input Fields */
+    form {
+      width: 100%;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-group i {
+      position: absolute;
+      left: 18px;
+      color: #6d776b;
+      font-size: 15px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      background-color: #e2e7df; /* Soft grayish-green input pill */
+      border: 1px solid transparent;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .input-group input::placeholder {
+      color: #727d70;
+    }
+
+    .input-group input:focus {
+      background-color: #ebf0e8;
+      border-color: #6a8868;
+    }
+
+    /* Primary Sign Up Button */
+    .btn-signup {
+      width: 100%;
+      padding: 14px;
+      background-color: #6a8868; /* Earthy sage green */
+      color: #ffffff;
+      border: none;
+      border-radius: 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      margin-bottom: 24px;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-signup:hover {
+      background-color: #587356;
+    }
+
+    /* Divider "or" */
+    .divider {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #c1c8be;
+    }
+
+    .divider span {
+      padding: 0 12px;
+      font-size: 12px;
+      color: #6d776b;
+    }
+
+    /* Social Sign-In Icons */
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 36px;
+    }
+
+    .social-icon {
+      color: #2b3a2d;
+      font-size: 26px;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .social-icon:hover {
+      opacity: 0.7;
+    }
+
+    /* Sign In Link Footer */
+    .footer-text {
+      font-size: 13px;
+      color: #4a5448;
+    }
+
+    .footer-text a {
+      color: #2b3a2d;
+      font-weight: 600;
+      text-decoration: underline;
+      margin-left: 4px;
+    }
+
+    .footer-text a:hover {
+      color: #6a8868;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="signup-card">
+    
+    <!-- Lotus Logo -->
+    <!-- Logo Image Input -->
+    <div class="logo-container">
+      <!-- REPLACE 'logo.png' WITH THE PATH TO YOUR IMAGE FILE -->
+      <img src="Tvl.png" alt="TravelInspo Logo" />
+    </div>
+
+    <!-- Title -->
+    <h1>Your journey starts here</h1>
+    <h2>Take the first step</h2>
+
+    <!-- Form Inputs -->
+    <form id="signupForm">
+      <div class="input-group">
+        <i class="fa-regular fa-envelope"></i>
+        <input type="email" id="emailInput" placeholder="E-mail" required />
+      </div>
+
+      <div class="input-group">
+        <i class="fa-regular fa-user"></i>
+        <input type="text" id="usernameInput" placeholder="Username" required />
+      </div>
+
+      <p id="signupError" style="color:#C4483E; font-size:12.5px; margin:-6px 0 10px; display:none;"></p>
+
+      <button type="submit" class="btn-signup">Continue</button>
+    </form>
+
+    <!-- Divider -->
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <!-- Social Login Buttons -->
+    <div class="social-links">
+      <a href="#" class="social-icon" aria-label="Facebook">
+        <i class="fa-brands fa-facebook"></i>
+      </a>
+      <a href="#" class="social-icon" aria-label="Apple">
+        <i class="fa-brands fa-apple"></i>
+      </a>
+      <a href="#" class="social-icon" aria-label="Google">
+        <i class="fa-brands fa-google"></i>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer-text">
+      Already have an account? <a href="Login.html">Sign in</a>
+    </p>
+
+  </div>
+
+<script>
+(function(){
+  const form = document.getElementById('signupForm');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value.trim();
+    const username = document.getElementById('usernameInput').value.trim();
+    window.location.href = 'SetPassword.html?email=' + encodeURIComponent(email) + '&username=' + encodeURIComponent(username);
+  });
+})();
+</script>
+
+</body>
+</html>

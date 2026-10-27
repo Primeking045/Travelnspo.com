@@ -1,0 +1,702 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA;
+    --mint:#E9F3EA;
+    --mint-line:#BFD8C4;
+    --olive:#7C9473;
+    --olive-dark:#66805C;
+    --ink:#242820;
+    --gray:#6B6F63;
+    --white:#FFFFFF;
+    --line:#E1DFD3;
+    --road:#DCE3D6;
+    --road-line:#F3F1E6;
+    --park:#D6E4D1;
+    --water:#C9D9DC;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#ECECEC;
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100%;
+    padding:24px 0;
+  }
+
+  .device{
+    width:100%;
+    max-width:400px;
+    height:min(844px, 92vh);
+    background:var(--cream);
+    border-radius:44px;
+    box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ---------- map canvas ---------- */
+  .map-canvas{
+    position:absolute; inset:0;
+    background:var(--road);
+    overflow:hidden;
+  }
+  .map-svg{
+    position:absolute;
+    top:50%; left:50%;
+    width:170%; height:170%;
+    transform:translate(-50%,-50%) scale(1);
+    transform-origin:center;
+    transition:transform .25s ease;
+  }
+  .pin{
+    position:absolute;
+    transform:translate(-50%,-100%);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+  }
+  .pin svg{width:34px; height:34px;}
+  .pin.selected svg{width:40px; height:40px;}
+
+  .me-dot{
+    position:absolute;
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#4C86F0;
+    border:3px solid var(--white);
+    box-shadow:0 0 0 6px rgba(76,134,240,0.25);
+    transform:translate(-50%,-50%);
+  }
+
+  /* ---------- top search bar + chips ---------- */
+  .map-top{
+    position:absolute; top:0; left:0; right:0;
+    padding:18px 16px 0;
+    z-index:5;
+  }
+  .search-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .map-back-btn{
+    width:44px; height:44px;
+    border-radius:50%;
+    background:var(--white);
+    border:none;
+    box-shadow:0 8px 20px rgba(36,40,32,0.14);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .search-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--white);
+    border-radius:100px;
+    padding:13px 16px;
+    box-shadow:0 8px 20px rgba(36,40,32,0.14);
+    flex:1;
+  }
+  .search-bar svg{width:19px; height:19px; stroke:var(--gray); flex-shrink:0;}
+  .search-bar input{
+    flex:1;
+    border:none; outline:none;
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:none;
+  }
+  .search-bar input::placeholder{color:var(--gray);}
+  .avatar-chip{
+    width:30px; height:30px;
+    border-radius:50%;
+    background:var(--olive);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--white);
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    flex-shrink:0;
+  }
+
+  .chip-row{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .chip-row::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;
+    display:flex; align-items:center; gap:6px;
+    background:var(--white);
+    padding:9px 14px;
+    border-radius:100px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    box-shadow:0 4px 10px rgba(36,40,32,0.1);
+    cursor:pointer;
+    border:1.5px solid transparent;
+  }
+  .chip.active{background:var(--olive); color:var(--white);}
+  .chip span.emoji{font-size:14px;}
+
+  /* ---------- floating map controls ---------- */
+  .map-controls{
+    position:absolute;
+    right:14px;
+    bottom:190px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:5;
+  }
+  .ctrl-btn{
+    width:42px; height:42px;
+    border-radius:50%;
+    background:var(--white);
+    border:none;
+    box-shadow:0 6px 16px rgba(36,40,32,0.18);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .zoom-group{
+    display:flex; flex-direction:column;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 6px 16px rgba(36,40,32,0.18);
+  }
+  .zoom-group button{
+    width:42px; height:38px;
+    background:var(--white);
+    border:none;
+    font-size:18px; font-weight:700;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .zoom-group button:first-child{border-bottom:1px solid var(--line);}
+
+  /* ---------- place bottom sheet ---------- */
+  .place-sheet{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    background:var(--white);
+    border-radius:26px 26px 0 0;
+    padding:16px 20px 22px;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.15);
+    transform:translateY(110%);
+    transition:transform .3s cubic-bezier(.65,0,.35,1);
+    z-index:6;
+  }
+  .place-sheet.open{transform:translateY(0);}
+  .sheet-handle{
+    width:38px; height:4px;
+    background:var(--line);
+    border-radius:10px;
+    margin:0 auto 14px;
+  }
+  .place-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .place-head h3{font-family:'Poppins', sans-serif; font-weight:700; font-size:18px;}
+  .place-meta{font-size:13px; color:var(--gray); margin-top:4px;}
+  .place-meta .dot{margin:0 6px;}
+  .sheet-close{
+    width:28px; height:28px; border-radius:50%;
+    border:none; background:var(--mint); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .place-actions{
+    display:flex; gap:10px;
+    margin-top:16px;
+  }
+  .place-btn{
+    flex:1;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:12px;
+    border-radius:100px;
+    border:none;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .place-btn.primary{background:var(--olive); color:var(--white);}
+  .place-btn.primary:hover{background:var(--olive-dark);}
+  .place-btn.ghost{background:var(--mint); color:var(--ink);}
+  .place-btn svg{width:16px; height:16px;}
+
+  /* ---------- Inspo FAB ---------- */
+  .inspo-fab{
+    position:absolute;
+    right:16px; bottom:26px;
+    z-index:7;
+    display:flex; align-items:center; gap:9px;
+    background:var(--ink);
+    color:var(--cream);
+    border:none;
+    border-radius:100px;
+    padding:13px 18px 13px 14px;
+    box-shadow:0 10px 24px rgba(36,40,32,0.35);
+    cursor:pointer;
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:14px;
+  }
+  .inspo-fab .spark{
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--olive);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .inspo-fab .spark svg{width:14px; height:14px;}
+
+  /* ---------- Inspo chat panel ---------- */
+  .chat-backdrop{
+    position:absolute; inset:0;
+    background:rgba(20,23,15,0.35);
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease;
+    z-index:10;
+  }
+  .chat-backdrop.open{opacity:1; pointer-events:auto;}
+  .chat-panel{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    height:78%;
+    background:var(--cream);
+    border-radius:26px 26px 0 0;
+    box-shadow:0 -12px 30px rgba(0,0,0,0.2);
+    transform:translateY(100%);
+    transition:transform .32s cubic-bezier(.65,0,.35,1);
+    z-index:11;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .chat-panel.open{transform:translateY(0);}
+  .chat-head{
+    display:flex; align-items:center; gap:10px;
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .chat-head .spark{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:var(--olive);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .chat-head .spark svg{width:18px; height:18px; stroke:var(--white);}
+  .chat-head .titles{flex:1;}
+  .chat-head h4{font-family:'Poppins', sans-serif; font-weight:700; font-size:16px;}
+  .chat-head .status{font-size:12px; color:var(--olive-dark); font-weight:600;}
+  .chat-close{
+    width:30px; height:30px; border-radius:50%;
+    border:none; background:var(--mint); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .chat-body{
+    flex:1;
+    overflow-y:auto;
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .msg{
+    max-width:80%;
+    padding:11px 14px;
+    border-radius:16px;
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  .msg.bot{
+    align-self:flex-start;
+    background:var(--mint);
+    color:var(--ink);
+    border-bottom-left-radius:4px;
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:var(--olive);
+    color:var(--white);
+    border-bottom-right-radius:4px;
+  }
+  .suggest-row{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top:2px;
+  }
+  .suggest-chip{
+    background:var(--white);
+    border:1.4px solid var(--mint-line);
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+    padding:8px 12px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .suggest-chip:hover{background:var(--mint);}
+
+  .typing{
+    align-self:flex-start;
+    display:flex; gap:4px;
+    background:var(--mint);
+    padding:12px 14px;
+    border-radius:16px;
+    border-bottom-left-radius:4px;
+  }
+  .typing span{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--gray);
+    opacity:0.5;
+    animation:blink 1s infinite;
+  }
+  .typing span:nth-child(2){animation-delay:.15s;}
+  .typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes blink{0%,80%,100%{opacity:0.3;}40%{opacity:1;}}
+
+  .chat-input-row{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
+    border-top:1px solid var(--line);
+    flex-shrink:0;
+    background:var(--cream);
+  }
+  .chat-input-row input{
+    flex:1;
+    background:var(--white);
+    border:1.5px solid var(--line);
+    border-radius:100px;
+    padding:12px 16px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    outline:none;
+    color:var(--ink);
+  }
+  .chat-input-row input:focus{border-color:var(--olive);}
+  .send-btn{
+    width:42px; height:42px;
+    border-radius:50%;
+    background:var(--olive);
+    border:none;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .send-btn svg{width:18px; height:18px; stroke:var(--white);}
+  .send-btn:disabled{opacity:0.5; cursor:default;}
+
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+
+  @media (max-width:440px){
+    body{padding:0; background:var(--cream);}
+    .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <div class="map-canvas" id="mapCanvas">
+    <svg class="map-svg" id="mapSvg" viewBox="0 0 400 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="800" fill="var(--road)"/>
+      <!-- park -->
+      <rect x="20" y="60" width="140" height="150" rx="18" fill="var(--park)"/>
+      <!-- water -->
+      <path d="M260 0 C300 60 220 120 270 200 C310 260 260 320 300 400 L400 400 L400 0 Z" fill="var(--water)"/>
+      <!-- roads -->
+      <g stroke="var(--road-line)" stroke-width="14" stroke-linecap="round">
+        <line x1="0" y1="230" x2="400" y2="230"/>
+        <line x1="0" y1="420" x2="400" y2="420"/>
+        <line x1="0" y1="610" x2="400" y2="610"/>
+        <line x1="90" y1="0" x2="90" y2="800"/>
+        <line x1="210" y1="0" x2="210" y2="800"/>
+        <line x1="330" y1="0" x2="330" y2="800"/>
+      </g>
+      <g stroke="var(--road-line)" stroke-width="7" stroke-linecap="round" opacity="0.8">
+        <line x1="0" y1="130" x2="400" y2="130"/>
+        <line x1="0" y1="320" x2="400" y2="320"/>
+        <line x1="0" y1="510" x2="400" y2="510"/>
+        <line x1="0" y1="700" x2="400" y2="700"/>
+        <line x1="150" y1="0" x2="150" y2="800"/>
+        <line x1="270" y1="0" x2="270" y2="800"/>
+      </g>
+      <!-- building blocks -->
+      <g fill="#CFD6C8">
+        <rect x="30" y="250" width="40" height="40" rx="6"/>
+        <rect x="110" y="260" width="60" height="30" rx="6"/>
+        <rect x="230" y="250" width="50" height="45" rx="6"/>
+        <rect x="30" y="440" width="45" height="45" rx="6"/>
+        <rect x="230" y="440" width="55" height="35" rx="6"/>
+        <rect x="30" y="630" width="45" height="40" rx="6"/>
+        <rect x="230" y="630" width="60" height="40" rx="6"/>
+        <rect x="110" y="630" width="45" height="45" rx="6"/>
+      </g>
+    </svg>
+
+    <div class="me-dot" style="top:52%; left:47%;"></div>
+
+    <!-- pins -->
+    <button class="pin" data-place="cafe" style="top:36%; left:22%;" aria-label="Sunset Café">
+      <svg viewBox="0 0 24 24" fill="var(--olive)" stroke="var(--white)" stroke-width="1"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z"/><circle cx="12" cy="10" r="3" fill="var(--white)"/></svg>
+    </button>
+    <button class="pin" data-place="park" style="top:20%; left:38%;" aria-label="Central Park">
+      <svg viewBox="0 0 24 24" fill="#4C7A52" stroke="var(--white)" stroke-width="1"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z"/><circle cx="12" cy="10" r="3" fill="var(--white)"/></svg>
+    </button>
+    <button class="pin" data-place="museum" style="top:58%; left:68%;" aria-label="City Museum">
+      <svg viewBox="0 0 24 24" fill="#C4483E" stroke="var(--white)" stroke-width="1"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z"/><circle cx="12" cy="10" r="3" fill="var(--white)"/></svg>
+    </button>
+    <button class="pin" data-place="hotel" style="top:76%; left:30%;" aria-label="Riverside Hotel">
+      <svg viewBox="0 0 24 24" fill="#B08B3E" stroke="var(--white)" stroke-width="1"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8Z"/><circle cx="12" cy="10" r="3" fill="var(--white)"/></svg>
+    </button>
+  </div>
+
+  <div class="map-top">
+    <div class="search-row">
+      <button class="map-back-btn" aria-label="Back to dashboard" onclick="window.location.href='Dashboard1.html'">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+        <input type="text" placeholder="Search places, addresses...">
+        <div class="avatar-chip">C</div>
+      </div>
+    </div>
+    <div class="chip-row">
+      <div class="chip active"><span class="emoji">📍</span>Nearby</div>
+      <div class="chip"><span class="emoji">🍽️</span>Food</div>
+      <div class="chip"><span class="emoji">⛽</span>Fuel</div>
+      <div class="chip"><span class="emoji">🏨</span>Hotels</div>
+      <div class="chip"><span class="emoji">🅿️</span>Parking</div>
+      <div class="chip"><span class="emoji">🏛️</span>Museums</div>
+    </div>
+  </div>
+
+  <div class="map-controls">
+    <button class="ctrl-btn" id="locateBtn" aria-label="Center on my location">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+    <div class="zoom-group">
+      <button id="zoomIn" aria-label="Zoom in">+</button>
+      <button id="zoomOut" aria-label="Zoom out">–</button>
+    </div>
+  </div>
+
+  <!-- place bottom sheet -->
+  <div class="place-sheet" id="placeSheet">
+    <div class="sheet-handle"></div>
+    <div class="place-head">
+      <div>
+        <h3 id="placeName">Sunset Café</h3>
+        <div class="place-meta"><span id="placeType">Café</span><span class="dot">•</span><span id="placeRating">4.6 ★</span><span class="dot">•</span><span id="placeDist">0.4 mi</span></div>
+      </div>
+      <button class="sheet-close" id="sheetClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+      </button>
+    </div>
+    <div class="place-actions">
+      <button class="place-btn primary" id="directionsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+        Directions
+      </button>
+      <button class="place-btn ghost" id="askInspoBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 5 5 .5-3.8 3.5 1 5-4.2-2.5-4.2 2.5 1-5L5 7.5 10 7z"/></svg>
+        Ask Inspo
+      </button>
+    </div>
+  </div>
+
+  <!-- Inspo FAB -->
+  <button class="inspo-fab" id="inspoFab">
+    <span class="spark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 5 5 .5-3.8 3.5 1 5-4.2-2.5-4.2 2.5 1-5L5 7.5 10 7z"/></svg>
+    </span>
+    Ask Inspo
+  </button>
+
+  <!-- Inspo chat panel -->
+  <div class="chat-backdrop" id="chatBackdrop"></div>
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-head">
+      <span class="spark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 5 5 .5-3.8 3.5 1 5-4.2-2.5-4.2 2.5 1-5L5 7.5 10 7z"/></svg>
+      </span>
+      <div class="titles">
+        <h4>Inspo</h4>
+        <div class="status">● Online — ask about any place</div>
+      </div>
+      <button class="chat-close" id="chatClose" aria-label="Close chat">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+      </button>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="msg bot">Hi, I'm Inspo 👋 Tap a pin or ask me anything about a place on the map — hours, vibe, what it's known for, how far it is.</div>
+      <div class="suggest-row">
+        <button class="suggest-chip" data-q="What is Sunset Café known for?">What's Sunset Café known for?</button>
+        <button class="suggest-chip" data-q="Is Central Park open right now?">Is Central Park open now?</button>
+        <button class="suggest-chip" data-q="How far is City Museum?">How far is City Museum?</button>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Ask Inspo about a place…">
+      <button class="send-btn" id="sendBtn" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // ---------- place data ----------
+  const places = {
+    cafe:   { name:"Sunset Café",    type:"Café",     rating:"4.6 ★", dist:"0.4 mi",
+      facts:"a slow-mornings kind of café — cold brew, warm pastries, and a patio that catches the evening light. Locals go for the sunset hour, hence the name." },
+    park:   { name:"Central Park",   type:"Park",      rating:"4.8 ★", dist:"0.9 mi",
+      facts:"the green heart of the neighborhood — open sunrise to 10pm, with walking paths, a small pond, and plenty of shade for a break between stops." },
+    museum: { name:"City Museum",    type:"Museum",    rating:"4.5 ★", dist:"1.6 mi",
+      facts:"a compact museum covering local history and rotating art exhibits. Worth 60–90 minutes; quietest right when it opens." },
+    hotel:  { name:"Riverside Hotel",type:"Hotel",     rating:"4.3 ★", dist:"1.1 mi",
+      facts:"a mid-range riverside stay with a rooftop deck — a solid, walkable base for exploring the area on foot." }
+  };
+  let activePlace = null;
+
+  // ---------- zoom ----------
+  const mapSvg = document.getElementById('mapSvg');
+  let zoom = 1;
+  function applyZoom(){ mapSvg.style.transform = `translate(-50%,-50%) scale(${zoom})`; }
+  document.getElementById('zoomIn').addEventListener('click', () => { zoom = Math.min(1.8, zoom + 0.15); applyZoom(); });
+  document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(0.7, zoom - 0.15); applyZoom(); });
+  document.getElementById('locateBtn').addEventListener('click', () => { zoom = 1; applyZoom(); });
+
+  // ---------- place bottom sheet ----------
+  const placeSheet = document.getElementById('placeSheet');
+  const pins = document.querySelectorAll('.pin');
+
+  function openPlace(key){
+    activePlace = key;
+    const p = places[key];
+    document.getElementById('placeName').textContent = p.name;
+    document.getElementById('placeType').textContent = p.type;
+    document.getElementById('placeRating').textContent = p.rating;
+    document.getElementById('placeDist').textContent = p.dist;
+    pins.forEach(pin => pin.classList.toggle('selected', pin.dataset.place === key));
+    placeSheet.classList.add('open');
+  }
+  function closePlace(){ placeSheet.classList.remove('open'); pins.forEach(p => p.classList.remove('selected')); }
+
+  pins.forEach(pin => pin.addEventListener('click', () => openPlace(pin.dataset.place)));
+  document.getElementById('sheetClose').addEventListener('click', closePlace);
+  document.getElementById('directionsBtn').addEventListener('click', () => {
+    // demo-only: wire this up to your real directions/routing flow
+    alert('This would hand off to live map directions.');
+  });
+
+  // ---------- Inspo chat ----------
+  const fab = document.getElementById('inspoFab');
+  const chatPanel = document.getElementById('chatPanel');
+  const chatBackdrop = document.getElementById('chatBackdrop');
+  const chatBody = document.getElementById('chatBody');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  function openChat(prefill){
+    chatPanel.classList.add('open');
+    chatBackdrop.classList.add('open');
+    if(prefill){ chatInput.value = prefill; sendMessage(); }
+  }
+  function closeChat(){ chatPanel.classList.remove('open'); chatBackdrop.classList.remove('open'); }
+
+  fab.addEventListener('click', () => openChat());
+  document.getElementById('chatClose').addEventListener('click', closeChat);
+  chatBackdrop.addEventListener('click', closeChat);
+  document.getElementById('askInspoBtn').addEventListener('click', () => {
+    const p = places[activePlace];
+    closePlace();
+    openChat(p ? `Tell me about ${p.name}` : null);
+  });
+
+  document.querySelectorAll('.suggest-chip').forEach(chip => {
+    chip.addEventListener('click', () => { chatInput.value = chip.dataset.q; sendMessage(); });
+  });
+
+  function addMessage(text, who){
+    const div = document.createElement('div');
+    div.className = 'msg ' + who;
+    div.textContent = text;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function findPlaceInText(text){
+    const t = text.toLowerCase();
+    return Object.values(places).find(p => t.includes(p.name.toLowerCase().split(' ')[0].toLowerCase()));
+  }
+
+  // demo-only response logic: replace with a real call to your AI backend,
+  // passing the map's place data / user location as context
+  function inspoReply(text){
+    const t = text.toLowerCase();
+    const place = findPlaceInText(text);
+
+    if(place){
+      if(t.includes('far') || t.includes('distance')) return `${place.name} is about ${place.dist} from where you are now.`;
+      if(t.includes('open') || t.includes('hour')) return `${place.name} is a ${place.type.toLowerCase()} rated ${place.rating}. I don't have live hours wired up in this demo yet, but that's exactly the kind of thing I'd confirm for you here.`;
+      return `${place.name} is ${place.facts}`;
+    }
+    return "Good question — in the full version I'll pull real details for whatever's on your map (hours, reviews, what it's known for). For now, try tapping a pin or asking about Sunset Café, Central Park, City Museum, or Riverside Hotel.";
+  }
+
+  function sendMessage(){
+    const text = chatInput.value.trim();
+    if(!text) return;
+    addMessage(text, 'user');
+    chatInput.value = '';
+    sendBtn.disabled = true;
+
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    chatBody.appendChild(typing);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    setTimeout(() => {
+      typing.remove();
+      addMessage(inspoReply(text), 'bot');
+      sendBtn.disabled = false;
+    }, 650);
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') sendMessage(); });
+})();
+</script>
+
+</body>
+</html>

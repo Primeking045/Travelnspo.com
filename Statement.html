@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TravelInspo — Generate Statement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5F3EA; --mint:#E9F3EA; --mint-line:#BFD8C4; --olive:#7C9473; --olive-dark:#66805C;
+    --bold:#28502F; --ink:#242820; --gray:#6B6F63; --input-bg:#E4E2D8; --line:#E1DFD3; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{background:#ECECEC; font-family:'Inter', sans-serif; color:var(--ink); display:flex; align-items:center; justify-content:center; min-height:100%; padding:24px 0;}
+  .device{width:100%; max-width:400px; height:min(844px, 92vh); background:var(--cream); border-radius:44px; box-shadow:0 40px 80px rgba(24,24,20,0.22), 0 0 0 10px #14170F; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+  .topbar{display:flex; align-items:center; gap:14px; padding:22px 20px 12px; flex-shrink:0;}
+  .back-btn{width:34px; height:34px; border:none; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .topbar h1{font-family:'Poppins', sans-serif; font-weight:800; font-size:19px;}
+  .scroll{flex:1; overflow-y:auto; padding:4px 22px 26px;}
+  .state{display:none;} .state.active{display:block;}
+
+  .field-label{font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; letter-spacing:.03em; margin:16px 0 8px;}
+  .field-label:first-child{margin-top:4px;}
+  select, input[type="date"]{
+    width:100%; background:var(--input-bg); border:1.5px solid transparent; border-radius:12px;
+    padding:13px 14px; font-family:'Inter', sans-serif; font-size:13.5px; color:var(--ink); outline:none;
+  }
+  select:focus, input:focus{border-color:var(--olive); background:var(--white);}
+  .range-row{display:flex; gap:10px;}
+  .range-row > div{flex:1;}
+
+  .format-row{display:flex; gap:10px; margin-top:4px;}
+  .format-chip{
+    flex:1; border:1.6px solid var(--line); border-radius:12px; padding:14px 6px; text-align:center;
+    cursor:pointer; font-size:12.5px; font-weight:700;
+  }
+  .format-chip.selected{border-color:var(--olive); background:var(--mint);}
+  .format-chip .emoji{display:block; font-size:20px; margin-bottom:4px;}
+
+  .btn{display:block; width:100%; text-align:center; font-family:'Inter', sans-serif; font-weight:700; font-size:15.5px;
+    padding:15px 20px; border-radius:100px; border:none; cursor:pointer; margin-top:24px;
+    transition:transform .15s ease, background .15s ease, box-shadow .15s ease;}
+  .btn-solid{background:var(--olive); color:var(--white); box-shadow:0 12px 24px rgba(124,148,115,0.35);}
+  .btn-solid:hover{background:var(--olive-dark); transform:translateY(-2px);}
+
+  .success-wrap{text-align:center; padding:30px 4px 4px;}
+  .check-circle{width:78px; height:78px; border-radius:50%; background:var(--olive); display:flex; align-items:center; justify-content:center; margin:6px auto 20px;}
+  .check-circle svg{width:36px; height:36px;}
+  .stmt-card{background:var(--bold); color:var(--white); border-radius:16px; padding:16px; margin-top:6px; display:flex; align-items:center; gap:12px;}
+  .stmt-card .ico{width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;}
+  .stmt-card b{font-size:13.5px; display:block;} .stmt-card span{font-size:11px; color:#C9E4B8;}
+
+  .home-indicator{width:120px; height:4px; background:var(--ink); opacity:0.2; border-radius:10px; margin:0 auto 12px; flex-shrink:0;}
+  :focus-visible{outline:3px solid var(--olive); outline-offset:2px;}
+  @media (max-width:440px){ body{padding:0; background:var(--cream);} .device{max-width:none; width:100%; height:100vh; border-radius:0; box-shadow:none;} }
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="topbar">
+    <button class="back-btn" aria-label="Back" onclick="window.location.href='Setting.html'">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+    <h1>Generate Statement</h1>
+  </div>
+  <div class="scroll">
+    <div class="state active" id="stateForm">
+      <div class="field-label">What to include</div>
+      <select id="scopeSelect">
+        <option>All activity (trips, loans, savings)</option>
+        <option>Trips only</option>
+        <option>Travel Loans only</option>
+        <option>Savings only</option>
+      </select>
+
+      <div class="field-label">Date range</div>
+      <div class="range-row">
+        <div><input type="date" id="fromDate"></div>
+        <div><input type="date" id="toDate"></div>
+      </div>
+
+      <div class="field-label">Format</div>
+      <div class="format-row">
+        <div class="format-chip selected" data-f="PDF"><span class="emoji">📄</span>PDF</div>
+        <div class="format-chip" data-f="CSV"><span class="emoji">📊</span>CSV</div>
+      </div>
+
+      <button class="btn btn-solid" id="genBtn">Generate Statement</button>
+    </div>
+
+    <div class="state" id="stateSuccess">
+      <div class="success-wrap">
+        <div class="check-circle"><svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <h2 style="font-family:'Poppins',sans-serif; font-weight:800; font-size:20px; margin-bottom:8px;">Statement ready</h2>
+        <p style="font-size:13px; color:var(--gray); line-height:1.5; margin-bottom:16px;">Your statement has been generated and sent to your email.</p>
+      </div>
+      <div class="stmt-card">
+        <div class="ico" id="stmtIco">📄</div>
+        <div><b id="stmtName">TravelInspo_Statement.pdf</b><span id="stmtMeta">All activity</span></div>
+      </div>
+      <button class="btn btn-solid" id="doneBtn">Back to Settings</button>
+    </div>
+  </div>
+  <div class="home-indicator"></div>
+</div>
+<script>
+(function(){
+  const today = new Date();
+  const from = new Date(today); from.setMonth(from.getMonth()-1);
+  document.getElementById('fromDate').value = from.toISOString().split('T')[0];
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+
+  let format = 'PDF';
+  document.querySelectorAll('.format-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      format = chip.dataset.f;
+    });
+  });
+
+  document.getElementById('genBtn').addEventListener('click', () => {
+    // demo-only: a real build would query the trips/loans/savings tables
+    // and render a real PDF/CSV server-side before emailing/downloading it.
+    const scope = document.getElementById('scopeSelect').value;
+    document.getElementById('stmtIco').textContent = format === 'PDF' ? '📄' : '📊';
+    document.getElementById('stmtName').textContent = 'TravelInspo_Statement.' + format.toLowerCase();
+    document.getElementById('stmtMeta').textContent = scope;
+    document.getElementById('stateForm').classList.remove('active');
+    document.getElementById('stateSuccess').classList.add('active');
+  });
+  document.getElementById('doneBtn').addEventListener('click', () => { window.location.href = 'Setting.html'; });
+})();
+</script>
+</body>
+</html>
